@@ -18,4 +18,8 @@ def window():
     sys.exit(app.exec_())
 
 
-window()
+locate_python = sys.exec_prefix
+
+print(locate_python)
+
+#window()
