@@ -13,6 +13,29 @@ class SudokuBoard:
         '''
         self.sub_sections = []
 
+    def solve(self):
+        solve_board = SudokuBoard(copy.deepcopy(self.arr))
+        i = 0
+        j = 0
+        while i <= 9:
+            while j <= 9:
+                if solve_board.arr[i][j] == 0:
+                    if solve_board.attempt_insert_num(j, i) is None:
+
+                j += 1
+            i += 1
+
+    def attempt_insert_num(self, x, y):
+        """
+            Tries to insert 1 in the location specified, if it cannot, tries 2 ...
+            If it cannot insert any number, returns None
+        """
+        for i in range(1, 10):
+            if self.valid_insert(x, y, i):
+                self.arr[y][x] = i
+                return [y, x]
+        return None
+
     def valid_insert(self, x, y, n):
         """ Check if inserting n at (x, y) results in a valid Sudoku board """
 
@@ -24,7 +47,7 @@ class SudokuBoard:
                 return False
 
         # Check sub_section
-        self.sub_sections = SudokuBoard.get_sub_sections(self.arr)
+        self.sub_sections = self.get_sub_sections()
         section_num = SudokuBoard.get_sub_section(x, y)
         row_index = {
             0: 0, 1: 0, 2: 0,
@@ -46,8 +69,7 @@ class SudokuBoard:
 
         return True
 
-    @staticmethod
-    def get_sub_sections(board):
+    def get_sub_sections(self):
         """ Returns the sub_sections of the sudoku board """
         sections = []
         for section in range(9):
@@ -64,7 +86,7 @@ class SudokuBoard:
             current_section = [[], [], []]
             for i in range(row_index, row_index + 3):
                 for j in range(column_index, column_index + 3):
-                    current_section[i - row_index].append(board[i][j])
+                    current_section[i - row_index].append(self.arr[i][j])
             sections.append(current_section)
         return sections
 
@@ -97,4 +119,5 @@ sudokuArr = [
        [0, 0, 0, 4, 1, 9, 0, 0, 5],
        [0, 0, 0, 0, 8, 0, 0, 7, 9]
 ]
-board = SudokuBoard(sudokuArr)
+sudoku_board = SudokuBoard(sudokuArr)
+sudoku_board.solve()
