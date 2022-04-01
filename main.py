@@ -1,4 +1,5 @@
 import copy
+import time
 
 
 class SudokuBoard:
@@ -15,10 +16,19 @@ class SudokuBoard:
 
     def __str__(self):
         self_string = ''
-        for i in range(9):
-            for j in range(9):
-                # i = row, j = column
-                pass  # todo finish
+        for row in range(9):
+            for subsection in range(3):
+                # The subsection horizontally
+                row_string = str(self.arr[row][3 * subsection:(3 * (subsection + 1))])
+                row_string = row_string.replace('[', '').replace(']', '').replace(',', '').replace('0', ' ')
+                self_string += row_string
+                if subsection != 2:
+                    self_string += ' | '
+            self_string += '\n'
+            if row == 2 or row == 5:
+                self_string += '-' * 21
+                self_string += '\n'
+        return self_string
 
     def solve(self):
         solve_board = SudokuBoard(copy.deepcopy(self.arr))
@@ -39,7 +49,7 @@ class SudokuBoard:
                         j = popped[0]
                         i = popped[1]
                         solve_board.arr[i][j] = 0
-                        SudokuBoard.cleanse_attempted_after(i, j, attempted_nums)
+                        SudokuBoard.cleanse_after(i, j, attempted_nums)
 
                         continue
                     else:
@@ -47,7 +57,7 @@ class SudokuBoard:
                         attempted_nums[(i * 9) + j].append(insert_num)
                 j += 1
             i += 1
-        return solve_board
+        return solve_board.arr
 
     def attempt_insert_num(self, x, y, ignore_vals):
         """
@@ -117,8 +127,8 @@ class SudokuBoard:
         return sections
 
     @staticmethod
-    def cleanse_attempted_after(i, j, to_clean):
-        """ Removes all values of attempted_nums after (j, i) """
+    def cleanse_after(i, j, to_clean):
+        """ Removes all values from to_clean (list of lists) after (j, i) """
         start_index = (i * 9) + j + 1
         for i in range(start_index, 82):
             to_clean[i].clear()
@@ -153,4 +163,9 @@ sudokuArr = [
     [0, 0, 0, 0, 8, 0, 0, 7, 9]
 ]
 sudoku_board = SudokuBoard(sudokuArr)
-sudoku_board.solve()
+print(sudoku_board)
+start = time.time()
+sudoku_board.arr = sudoku_board.solve()
+print(sudoku_board)
+end = time.time()
+print(end - start)
