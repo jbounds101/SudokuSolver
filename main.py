@@ -12,7 +12,6 @@ class SudokuBoard:
         3 4 5
         6 7 8
         '''
-        self.sub_sections = []
 
     def __str__(self):
         self_string = ''
@@ -31,6 +30,7 @@ class SudokuBoard:
         return self_string
 
     def solve(self):
+        """ Returns the solved array of the SudokuBoard object """
         solve_board = SudokuBoard(copy.deepcopy(self.arr))
         attempted_nums = []
         for i in range(82):
@@ -54,6 +54,8 @@ class SudokuBoard:
                         continue
                     else:
                         solution_stack.append([j, i, insert_num])
+
+                        # noinspection PyTypeChecker
                         attempted_nums[(i * 9) + j].append(insert_num)
                 j += 1
             i += 1
@@ -83,7 +85,6 @@ class SudokuBoard:
                 return False
 
         # Check sub_section
-        self.sub_sections = self.get_sub_sections()
         section_num = SudokuBoard.get_sub_section(x, y)
         row_index = {
             0: 0, 1: 0, 2: 0,
