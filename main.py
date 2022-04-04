@@ -179,31 +179,3 @@ other_sudoku_arr = [
 ]
 
 
-def window():
-    app = QApplication(sys.argv)
-
-    # thing_add = QtWidgets.#(page_to_add_to)
-
-    win = QMainWindow()
-    win.setGeometry(1000, 1000, 1000, 1000)
-    win.setWindowTitle("Sudoku")
-
-    label = QtWidgets.QLabel(win)
-    label.setText("Label!")
-    label.move(200, 200)
-
-    b1 = QtWidgets.QPushButton(win)
-    b1.setText("Button here!")
-    b1.move(200, 200)
-    b1.clicked.connect(button_press)
-
-    win.show()
-    sys.exit(app.exec_())
-
-
-def button_press():
-    print("button pressed!")
-
-
-sudoku_board = SudokuBoard(other_sudoku_arr)
-window()
