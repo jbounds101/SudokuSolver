@@ -1,158 +1,8 @@
-import copy
 from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import QApplication, QMainWindow
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
 import sys
-
-
-class SudokuBoard:
-    def __init__(self, arr):
-        self.arr = arr
-
-        '''
-        sub_sections are in the form:
-        0 1 2
-        3 4 5
-        6 7 8
-        '''
-
-    def __str__(self):
-        self_string = ''
-        for row in range(9):
-            for subsection in range(3):
-                # The subsection horizontally
-                row_string = str(self.arr[row][3 * subsection:(3 * (subsection + 1))])
-                row_string = row_string.replace('[', '').replace(']', '').replace(',', '').replace('0', ' ')
-                self_string += row_string
-                if subsection != 2:
-                    self_string += ' | '
-            self_string += '\n'
-            if row == 2 or row == 5:
-                self_string += '-' * 21
-                self_string += '\n'
-        return self_string
-
-    def solve(self):
-        """ Returns the solved array of the SudokuBoard object """
-        solve_board = SudokuBoard(copy.deepcopy(self.arr))
-        attempted_nums = []
-        for i in range(82):
-            attempted_nums.append([])
-
-        solution_stack = []
-        i = 0
-        while i < 9:
-            j = 0
-            while j < 9:
-                if solve_board.arr[i][j] == 0:
-                    insert_num = solve_board.__attempt_insert_num(j, i, attempted_nums[(i * 9) + j])
-                    if insert_num == -1:
-                        # No solution for the current location, pop stack
-                        popped = solution_stack.pop()
-                        j = popped[0]
-                        i = popped[1]
-                        solve_board.arr[i][j] = 0
-                        SudokuBoard.__cleanse_after(i, j, attempted_nums)
-
-                        continue
-                    else:
-                        solution_stack.append([j, i, insert_num])
-
-                        # noinspection PyTypeChecker
-                        attempted_nums[(i * 9) + j].append(insert_num)
-                j += 1
-            i += 1
-        return solve_board.arr
-
-    def get_sub_sections(self):
-        """ Returns the sub_sections of the sudoku board """
-        sections = []
-        for section in range(9):
-            row_index = {
-                0: 0, 1: 0, 2: 0,
-                3: 3, 4: 3, 5: 3,
-                6: 6, 7: 6, 8: 6
-            }[section]
-            column_index = {
-                0: 0, 1: 3, 2: 6,
-                3: 0, 4: 3, 5: 6,
-                6: 0, 7: 3, 8: 6
-            }[section]
-            current_section = [[], [], []]
-            for i in range(row_index, row_index + 3):
-                for j in range(column_index, column_index + 3):
-                    current_section[i - row_index].append(self.arr[i][j])
-            sections.append(current_section)
-        return sections
-
-    def __attempt_insert_num(self, x, y, ignore_vals):
-        """
-            Tries to insert 1 in the location specified, if it cannot, tries 2 ...
-            If it cannot insert any number, returns None
-        """
-        for i in range(1, 10):
-            if i in ignore_vals:
-                continue
-            if self.__valid_insert(x, y, i):
-                self.arr[y][x] = i
-                return i
-        return -1
-
-    def __valid_insert(self, x, y, n):
-        """ Check if inserting n at (x, y) results in a valid Sudoku board """
-
-        # Go across row and column simultaneously
-        for i in range(9):
-            if (self.arr[y][i] == n) and (i != x):
-                return False
-            if (self.arr[i][x] == n) and (i != y):
-                return False
-
-        # Check sub_section
-        section_num = SudokuBoard.__get_sub_section(x, y)
-        row_index = {
-            0: 0, 1: 0, 2: 0,
-            3: 3, 4: 3, 5: 3,
-            6: 6, 7: 6, 8: 6
-        }[section_num]
-        column_index = {
-            0: 0, 1: 3, 2: 6,
-            3: 0, 4: 3, 5: 6,
-            6: 0, 7: 3, 8: 6
-        }[section_num]
-        for i in range(row_index, row_index + 3):
-            for j in range(column_index, column_index + 3):
-                if (i == y) and (j == x):
-                    # Skip the value we are looking to change
-                    continue
-                if self.arr[i][j] == n:
-                    return False
-
-        return True
-
-    @staticmethod
-    def __cleanse_after(i, j, to_clean):
-        """ Removes all values from to_clean (list of lists) after (j, i) """
-        start_index = (i * 9) + j + 1
-        for i in range(start_index, 82):
-            to_clean[i].clear()
-
-    @staticmethod
-    def __get_sub_section(x, y):
-        """ Returns the sub_section of the given (x,y) coordinate """
-        coord = {
-            0: 0, 1: 0, 2: 0,
-            3: 1, 4: 1, 5: 1,
-            6: 2, 7: 2, 8: 2
-        }
-        row = coord[y]
-        column = coord[x]
-
-        return {
-            (0, 0): 0, (0, 1): 1, (0, 2): 2,
-            (1, 0): 3, (1, 1): 4, (1, 2): 5,
-            (2, 0): 6, (2, 1): 7, (2, 2): 8
-        }[row, column]
-
 
 sudokuArr = [
     [5, 3, 0, 0, 7, 0, 0, 0, 0],
@@ -179,3 +29,2552 @@ other_sudoku_arr = [
 ]
 
 
+# -*- coding: utf-8 -*-
+
+################################################################################
+## Form generated from reading UI file 'untitledJaMRQs.ui'
+##
+## Created by: Qt User Interface Compiler version 5.15.2
+##
+## WARNING! All changes made in this file will be lost when recompiling UI file!
+################################################################################
+
+
+class Ui_SudokuSolver(object):
+    def setupUi(self, SudokuSolver):
+        if not SudokuSolver.objectName():
+            SudokuSolver.setObjectName(u"SudokuSolver")
+        SudokuSolver.resize(960, 540)
+        font = QFont()
+        font.setFamily(u"Verdana")
+        font.setPointSize(26)
+        SudokuSolver.setFont(font)
+        SudokuSolver.setFocusPolicy(Qt.ClickFocus)
+        SudokuSolver.setStyleSheet(u"")
+        SudokuSolver.setSizeGripEnabled(False)
+        self.gridFrame = QFrame(SudokuSolver)
+        self.gridFrame.setObjectName(u"gridFrame")
+        self.gridFrame.setGeometry(QRect(20, 20, 495, 495))
+        self.gridFrame.setFrameShape(QFrame.Box)
+        self.gridFrame.setLineWidth(2)
+        self.gridLayout = QGridLayout(self.gridFrame)
+        self.gridLayout.setObjectName(u"gridLayout")
+        self.gridLayout.setContentsMargins(1, 1, 1, 1)
+        self.gridLayout_2 = QGridLayout()
+        self.gridLayout_2.setSpacing(0)
+        self.gridLayout_2.setObjectName(u"gridLayout_2")
+        self.inputBox_17 = QLineEdit(self.gridFrame)
+        self.inputBox_17.setObjectName(u"inputBox_17")
+        sizePolicy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.inputBox_17.sizePolicy().hasHeightForWidth())
+        self.inputBox_17.setSizePolicy(sizePolicy)
+        self.inputBox_17.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_17.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_17.setMaxLength(1)
+        self.inputBox_17.setEchoMode(QLineEdit.Normal)
+        self.inputBox_17.setAlignment(Qt.AlignCenter)
+        self.inputBox_17.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_17.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_17, 2, 11, 1, 1)
+
+        self.line_26 = QFrame(self.gridFrame)
+        self.line_26.setObjectName(u"line_26")
+        self.line_26.setFrameShadow(QFrame.Plain)
+        self.line_26.setLineWidth(100)
+        self.line_26.setMidLineWidth(0)
+        self.line_26.setFrameShape(QFrame.HLine)
+
+        self.gridLayout_2.addWidget(self.line_26, 4, 10, 1, 1)
+
+        self.line_14 = QFrame(self.gridFrame)
+        self.line_14.setObjectName(u"line_14")
+        self.line_14.setFrameShadow(QFrame.Plain)
+        self.line_14.setLineWidth(100)
+        self.line_14.setMidLineWidth(0)
+        self.line_14.setFrameShape(QFrame.VLine)
+
+        self.gridLayout_2.addWidget(self.line_14, 6, 7, 1, 1)
+
+        self.inputBox_49 = QLineEdit(self.gridFrame)
+        self.inputBox_49.setObjectName(u"inputBox_49")
+        sizePolicy.setHeightForWidth(self.inputBox_49.sizePolicy().hasHeightForWidth())
+        self.inputBox_49.setSizePolicy(sizePolicy)
+        self.inputBox_49.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_49.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_49.setMaxLength(1)
+        self.inputBox_49.setEchoMode(QLineEdit.Normal)
+        self.inputBox_49.setAlignment(Qt.AlignCenter)
+        self.inputBox_49.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_49.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_49, 7, 5, 1, 1)
+
+        self.inputBox_35 = QLineEdit(self.gridFrame)
+        self.inputBox_35.setObjectName(u"inputBox_35")
+        sizePolicy.setHeightForWidth(self.inputBox_35.sizePolicy().hasHeightForWidth())
+        self.inputBox_35.setSizePolicy(sizePolicy)
+        self.inputBox_35.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_35.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_35.setMaxLength(1)
+        self.inputBox_35.setEchoMode(QLineEdit.Normal)
+        self.inputBox_35.setAlignment(Qt.AlignCenter)
+        self.inputBox_35.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_35.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_35, 5, 11, 1, 1)
+
+        self.inputBox_63 = QLineEdit(self.gridFrame)
+        self.inputBox_63.setObjectName(u"inputBox_63")
+        sizePolicy.setHeightForWidth(self.inputBox_63.sizePolicy().hasHeightForWidth())
+        self.inputBox_63.setSizePolicy(sizePolicy)
+        self.inputBox_63.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_63.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_63.setMaxLength(1)
+        self.inputBox_63.setEchoMode(QLineEdit.Normal)
+        self.inputBox_63.setAlignment(Qt.AlignCenter)
+        self.inputBox_63.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_63.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_63, 10, 0, 1, 1)
+
+        self.inputBox_22 = QLineEdit(self.gridFrame)
+        self.inputBox_22.setObjectName(u"inputBox_22")
+        sizePolicy.setHeightForWidth(self.inputBox_22.sizePolicy().hasHeightForWidth())
+        self.inputBox_22.setSizePolicy(sizePolicy)
+        self.inputBox_22.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_22.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_22.setMaxLength(1)
+        self.inputBox_22.setEchoMode(QLineEdit.Normal)
+        self.inputBox_22.setAlignment(Qt.AlignCenter)
+        self.inputBox_22.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_22.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_22, 3, 5, 1, 1)
+
+        self.inputBox_23 = QLineEdit(self.gridFrame)
+        self.inputBox_23.setObjectName(u"inputBox_23")
+        sizePolicy.setHeightForWidth(self.inputBox_23.sizePolicy().hasHeightForWidth())
+        self.inputBox_23.setSizePolicy(sizePolicy)
+        self.inputBox_23.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_23.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_23.setMaxLength(1)
+        self.inputBox_23.setEchoMode(QLineEdit.Normal)
+        self.inputBox_23.setAlignment(Qt.AlignCenter)
+        self.inputBox_23.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_23.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_23, 3, 6, 1, 1)
+
+        self.inputBox_66 = QLineEdit(self.gridFrame)
+        self.inputBox_66.setObjectName(u"inputBox_66")
+        sizePolicy.setHeightForWidth(self.inputBox_66.sizePolicy().hasHeightForWidth())
+        self.inputBox_66.setSizePolicy(sizePolicy)
+        self.inputBox_66.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_66.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_66.setMaxLength(1)
+        self.inputBox_66.setEchoMode(QLineEdit.Normal)
+        self.inputBox_66.setAlignment(Qt.AlignCenter)
+        self.inputBox_66.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_66.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_66, 10, 4, 1, 1)
+
+        self.line_17 = QFrame(self.gridFrame)
+        self.line_17.setObjectName(u"line_17")
+        self.line_17.setFrameShadow(QFrame.Plain)
+        self.line_17.setLineWidth(100)
+        self.line_17.setMidLineWidth(0)
+        self.line_17.setFrameShape(QFrame.VLine)
+
+        self.gridLayout_2.addWidget(self.line_17, 2, 7, 1, 1)
+
+        self.inputBox_48 = QLineEdit(self.gridFrame)
+        self.inputBox_48.setObjectName(u"inputBox_48")
+        sizePolicy.setHeightForWidth(self.inputBox_48.sizePolicy().hasHeightForWidth())
+        self.inputBox_48.setSizePolicy(sizePolicy)
+        self.inputBox_48.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_48.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_48.setMaxLength(1)
+        self.inputBox_48.setEchoMode(QLineEdit.Normal)
+        self.inputBox_48.setAlignment(Qt.AlignCenter)
+        self.inputBox_48.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_48.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_48, 7, 4, 1, 1)
+
+        self.line_25 = QFrame(self.gridFrame)
+        self.line_25.setObjectName(u"line_25")
+        self.line_25.setFrameShadow(QFrame.Plain)
+        self.line_25.setLineWidth(100)
+        self.line_25.setMidLineWidth(0)
+        self.line_25.setFrameShape(QFrame.HLine)
+
+        self.gridLayout_2.addWidget(self.line_25, 4, 9, 1, 1)
+
+        self.inputBox_61 = QLineEdit(self.gridFrame)
+        self.inputBox_61.setObjectName(u"inputBox_61")
+        sizePolicy.setHeightForWidth(self.inputBox_61.sizePolicy().hasHeightForWidth())
+        self.inputBox_61.setSizePolicy(sizePolicy)
+        self.inputBox_61.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_61.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_61.setMaxLength(1)
+        self.inputBox_61.setEchoMode(QLineEdit.Normal)
+        self.inputBox_61.setAlignment(Qt.AlignCenter)
+        self.inputBox_61.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_61.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_61, 9, 10, 1, 1)
+
+        self.inputBox_25 = QLineEdit(self.gridFrame)
+        self.inputBox_25.setObjectName(u"inputBox_25")
+        sizePolicy.setHeightForWidth(self.inputBox_25.sizePolicy().hasHeightForWidth())
+        self.inputBox_25.setSizePolicy(sizePolicy)
+        self.inputBox_25.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_25.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_25.setMaxLength(1)
+        self.inputBox_25.setEchoMode(QLineEdit.Normal)
+        self.inputBox_25.setAlignment(Qt.AlignCenter)
+        self.inputBox_25.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_25.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_25, 3, 10, 1, 1)
+
+        self.inputBox_16 = QLineEdit(self.gridFrame)
+        self.inputBox_16.setObjectName(u"inputBox_16")
+        sizePolicy.setHeightForWidth(self.inputBox_16.sizePolicy().hasHeightForWidth())
+        self.inputBox_16.setSizePolicy(sizePolicy)
+        self.inputBox_16.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_16.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_16.setMaxLength(1)
+        self.inputBox_16.setEchoMode(QLineEdit.Normal)
+        self.inputBox_16.setAlignment(Qt.AlignCenter)
+        self.inputBox_16.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_16.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_16, 2, 10, 1, 1)
+
+        self.inputBox_59 = QLineEdit(self.gridFrame)
+        self.inputBox_59.setObjectName(u"inputBox_59")
+        sizePolicy.setHeightForWidth(self.inputBox_59.sizePolicy().hasHeightForWidth())
+        self.inputBox_59.setSizePolicy(sizePolicy)
+        self.inputBox_59.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_59.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_59.setMaxLength(1)
+        self.inputBox_59.setEchoMode(QLineEdit.Normal)
+        self.inputBox_59.setAlignment(Qt.AlignCenter)
+        self.inputBox_59.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_59.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_59, 9, 6, 1, 1)
+
+        self.line_31 = QFrame(self.gridFrame)
+        self.line_31.setObjectName(u"line_31")
+        self.line_31.setFrameShadow(QFrame.Plain)
+        self.line_31.setLineWidth(100)
+        self.line_31.setMidLineWidth(0)
+        self.line_31.setFrameShape(QFrame.HLine)
+
+        self.gridLayout_2.addWidget(self.line_31, 8, 6, 1, 1)
+
+        self.inputBox_31 = QLineEdit(self.gridFrame)
+        self.inputBox_31.setObjectName(u"inputBox_31")
+        sizePolicy.setHeightForWidth(self.inputBox_31.sizePolicy().hasHeightForWidth())
+        self.inputBox_31.setSizePolicy(sizePolicy)
+        self.inputBox_31.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_31.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_31.setMaxLength(1)
+        self.inputBox_31.setEchoMode(QLineEdit.Normal)
+        self.inputBox_31.setAlignment(Qt.AlignCenter)
+        self.inputBox_31.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_31.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_31, 5, 5, 1, 1)
+
+        self.inputBox_42 = QLineEdit(self.gridFrame)
+        self.inputBox_42.setObjectName(u"inputBox_42")
+        sizePolicy.setHeightForWidth(self.inputBox_42.sizePolicy().hasHeightForWidth())
+        self.inputBox_42.setSizePolicy(sizePolicy)
+        self.inputBox_42.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_42.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_42.setMaxLength(1)
+        self.inputBox_42.setEchoMode(QLineEdit.Normal)
+        self.inputBox_42.setAlignment(Qt.AlignCenter)
+        self.inputBox_42.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_42.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_42, 6, 9, 1, 1)
+
+        self.inputBox_11 = QLineEdit(self.gridFrame)
+        self.inputBox_11.setObjectName(u"inputBox_11")
+        sizePolicy.setHeightForWidth(self.inputBox_11.sizePolicy().hasHeightForWidth())
+        self.inputBox_11.setSizePolicy(sizePolicy)
+        self.inputBox_11.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_11.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_11.setMaxLength(1)
+        self.inputBox_11.setEchoMode(QLineEdit.Normal)
+        self.inputBox_11.setAlignment(Qt.AlignCenter)
+        self.inputBox_11.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_11.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_11, 2, 2, 1, 1)
+
+        self.line_27 = QFrame(self.gridFrame)
+        self.line_27.setObjectName(u"line_27")
+        self.line_27.setFrameShadow(QFrame.Plain)
+        self.line_27.setLineWidth(100)
+        self.line_27.setMidLineWidth(0)
+        self.line_27.setFrameShape(QFrame.HLine)
+
+        self.gridLayout_2.addWidget(self.line_27, 4, 11, 1, 1)
+
+        self.inputBox_1 = QLineEdit(self.gridFrame)
+        self.inputBox_1.setObjectName(u"inputBox_1")
+        sizePolicy.setHeightForWidth(self.inputBox_1.sizePolicy().hasHeightForWidth())
+        self.inputBox_1.setSizePolicy(sizePolicy)
+        self.inputBox_1.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_1.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_1.setMaxLength(1)
+        self.inputBox_1.setEchoMode(QLineEdit.Normal)
+        self.inputBox_1.setAlignment(Qt.AlignCenter)
+        self.inputBox_1.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_1.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_1, 1, 1, 1, 1)
+
+        self.line_12 = QFrame(self.gridFrame)
+        self.line_12.setObjectName(u"line_12")
+        self.line_12.setFrameShadow(QFrame.Plain)
+        self.line_12.setLineWidth(100)
+        self.line_12.setMidLineWidth(0)
+        self.line_12.setFrameShape(QFrame.VLine)
+
+        self.gridLayout_2.addWidget(self.line_12, 9, 7, 1, 1)
+
+        self.line_33 = QFrame(self.gridFrame)
+        self.line_33.setObjectName(u"line_33")
+        self.line_33.setFrameShadow(QFrame.Plain)
+        self.line_33.setLineWidth(100)
+        self.line_33.setMidLineWidth(0)
+        self.line_33.setFrameShape(QFrame.HLine)
+
+        self.gridLayout_2.addWidget(self.line_33, 8, 4, 1, 1)
+
+        self.line_35 = QFrame(self.gridFrame)
+        self.line_35.setObjectName(u"line_35")
+        self.line_35.setFrameShadow(QFrame.Plain)
+        self.line_35.setLineWidth(100)
+        self.line_35.setMidLineWidth(0)
+        self.line_35.setFrameShape(QFrame.HLine)
+
+        self.gridLayout_2.addWidget(self.line_35, 8, 1, 1, 1)
+
+        self.line_5 = QFrame(self.gridFrame)
+        self.line_5.setObjectName(u"line_5")
+        self.line_5.setFrameShadow(QFrame.Plain)
+        self.line_5.setLineWidth(100)
+        self.line_5.setMidLineWidth(0)
+        self.line_5.setFrameShape(QFrame.VLine)
+
+        self.gridLayout_2.addWidget(self.line_5, 10, 3, 1, 1)
+
+        self.inputBox_68 = QLineEdit(self.gridFrame)
+        self.inputBox_68.setObjectName(u"inputBox_68")
+        sizePolicy.setHeightForWidth(self.inputBox_68.sizePolicy().hasHeightForWidth())
+        self.inputBox_68.setSizePolicy(sizePolicy)
+        self.inputBox_68.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_68.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_68.setMaxLength(1)
+        self.inputBox_68.setEchoMode(QLineEdit.Normal)
+        self.inputBox_68.setAlignment(Qt.AlignCenter)
+        self.inputBox_68.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_68.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_68, 10, 6, 1, 1)
+
+        self.inputBox_65 = QLineEdit(self.gridFrame)
+        self.inputBox_65.setObjectName(u"inputBox_65")
+        sizePolicy.setHeightForWidth(self.inputBox_65.sizePolicy().hasHeightForWidth())
+        self.inputBox_65.setSizePolicy(sizePolicy)
+        self.inputBox_65.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_65.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_65.setMaxLength(1)
+        self.inputBox_65.setEchoMode(QLineEdit.Normal)
+        self.inputBox_65.setAlignment(Qt.AlignCenter)
+        self.inputBox_65.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_65.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_65, 10, 2, 1, 1)
+
+        self.inputBox_37 = QLineEdit(self.gridFrame)
+        self.inputBox_37.setObjectName(u"inputBox_37")
+        sizePolicy.setHeightForWidth(self.inputBox_37.sizePolicy().hasHeightForWidth())
+        self.inputBox_37.setSizePolicy(sizePolicy)
+        self.inputBox_37.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_37.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_37.setMaxLength(1)
+        self.inputBox_37.setEchoMode(QLineEdit.Normal)
+        self.inputBox_37.setAlignment(Qt.AlignCenter)
+        self.inputBox_37.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_37.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_37, 6, 1, 1, 1)
+
+        self.line_6 = QFrame(self.gridFrame)
+        self.line_6.setObjectName(u"line_6")
+        self.line_6.setFrameShadow(QFrame.Plain)
+        self.line_6.setLineWidth(100)
+        self.line_6.setMidLineWidth(0)
+        self.line_6.setFrameShape(QFrame.VLine)
+
+        self.gridLayout_2.addWidget(self.line_6, 11, 3, 1, 1)
+
+        self.line_2 = QFrame(self.gridFrame)
+        self.line_2.setObjectName(u"line_2")
+        self.line_2.setFrameShadow(QFrame.Plain)
+        self.line_2.setLineWidth(100)
+        self.line_2.setMidLineWidth(0)
+        self.line_2.setFrameShape(QFrame.VLine)
+
+        self.gridLayout_2.addWidget(self.line_2, 5, 3, 1, 1)
+
+        self.line_24 = QFrame(self.gridFrame)
+        self.line_24.setObjectName(u"line_24")
+        self.line_24.setFrameShadow(QFrame.Plain)
+        self.line_24.setLineWidth(100)
+        self.line_24.setMidLineWidth(0)
+        self.line_24.setFrameShape(QFrame.HLine)
+
+        self.gridLayout_2.addWidget(self.line_24, 4, 6, 1, 1)
+
+        self.line_22 = QFrame(self.gridFrame)
+        self.line_22.setObjectName(u"line_22")
+        self.line_22.setFrameShadow(QFrame.Plain)
+        self.line_22.setLineWidth(100)
+        self.line_22.setMidLineWidth(0)
+        self.line_22.setFrameShape(QFrame.HLine)
+
+        self.gridLayout_2.addWidget(self.line_22, 4, 4, 1, 1)
+
+        self.inputBox_55 = QLineEdit(self.gridFrame)
+        self.inputBox_55.setObjectName(u"inputBox_55")
+        sizePolicy.setHeightForWidth(self.inputBox_55.sizePolicy().hasHeightForWidth())
+        self.inputBox_55.setSizePolicy(sizePolicy)
+        self.inputBox_55.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_55.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_55.setMaxLength(1)
+        self.inputBox_55.setEchoMode(QLineEdit.Normal)
+        self.inputBox_55.setAlignment(Qt.AlignCenter)
+        self.inputBox_55.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_55.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_55, 9, 1, 1, 1)
+
+        self.inputBox_41 = QLineEdit(self.gridFrame)
+        self.inputBox_41.setObjectName(u"inputBox_41")
+        sizePolicy.setHeightForWidth(self.inputBox_41.sizePolicy().hasHeightForWidth())
+        self.inputBox_41.setSizePolicy(sizePolicy)
+        self.inputBox_41.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_41.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_41.setMaxLength(1)
+        self.inputBox_41.setEchoMode(QLineEdit.Normal)
+        self.inputBox_41.setAlignment(Qt.AlignCenter)
+        self.inputBox_41.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_41.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_41, 6, 6, 1, 1)
+
+        self.inputBox_72 = QLineEdit(self.gridFrame)
+        self.inputBox_72.setObjectName(u"inputBox_72")
+        sizePolicy.setHeightForWidth(self.inputBox_72.sizePolicy().hasHeightForWidth())
+        self.inputBox_72.setSizePolicy(sizePolicy)
+        self.inputBox_72.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_72.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_72.setMaxLength(1)
+        self.inputBox_72.setEchoMode(QLineEdit.Normal)
+        self.inputBox_72.setAlignment(Qt.AlignCenter)
+        self.inputBox_72.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_72.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_72, 11, 0, 1, 1)
+
+        self.line_4 = QFrame(self.gridFrame)
+        self.line_4.setObjectName(u"line_4")
+        self.line_4.setFrameShadow(QFrame.Plain)
+        self.line_4.setLineWidth(100)
+        self.line_4.setMidLineWidth(0)
+        self.line_4.setFrameShape(QFrame.VLine)
+
+        self.gridLayout_2.addWidget(self.line_4, 9, 3, 1, 1)
+
+        self.inputBox_38 = QLineEdit(self.gridFrame)
+        self.inputBox_38.setObjectName(u"inputBox_38")
+        sizePolicy.setHeightForWidth(self.inputBox_38.sizePolicy().hasHeightForWidth())
+        self.inputBox_38.setSizePolicy(sizePolicy)
+        self.inputBox_38.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_38.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_38.setMaxLength(1)
+        self.inputBox_38.setEchoMode(QLineEdit.Normal)
+        self.inputBox_38.setAlignment(Qt.AlignCenter)
+        self.inputBox_38.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_38.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_38, 6, 2, 1, 1)
+
+        self.inputBox_24 = QLineEdit(self.gridFrame)
+        self.inputBox_24.setObjectName(u"inputBox_24")
+        sizePolicy.setHeightForWidth(self.inputBox_24.sizePolicy().hasHeightForWidth())
+        self.inputBox_24.setSizePolicy(sizePolicy)
+        self.inputBox_24.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_24.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_24.setMaxLength(1)
+        self.inputBox_24.setEchoMode(QLineEdit.Normal)
+        self.inputBox_24.setAlignment(Qt.AlignCenter)
+        self.inputBox_24.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_24.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_24, 3, 9, 1, 1)
+
+        self.inputBox_14 = QLineEdit(self.gridFrame)
+        self.inputBox_14.setObjectName(u"inputBox_14")
+        sizePolicy.setHeightForWidth(self.inputBox_14.sizePolicy().hasHeightForWidth())
+        self.inputBox_14.setSizePolicy(sizePolicy)
+        self.inputBox_14.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_14.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_14.setMaxLength(1)
+        self.inputBox_14.setEchoMode(QLineEdit.Normal)
+        self.inputBox_14.setAlignment(Qt.AlignCenter)
+        self.inputBox_14.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_14.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_14, 2, 6, 1, 1)
+
+        self.line_18 = QFrame(self.gridFrame)
+        self.line_18.setObjectName(u"line_18")
+        self.line_18.setFrameShadow(QFrame.Plain)
+        self.line_18.setLineWidth(100)
+        self.line_18.setMidLineWidth(0)
+        self.line_18.setFrameShape(QFrame.VLine)
+
+        self.gridLayout_2.addWidget(self.line_18, 1, 7, 1, 1)
+
+        self.inputBox_45 = QLineEdit(self.gridFrame)
+        self.inputBox_45.setObjectName(u"inputBox_45")
+        sizePolicy.setHeightForWidth(self.inputBox_45.sizePolicy().hasHeightForWidth())
+        self.inputBox_45.setSizePolicy(sizePolicy)
+        self.inputBox_45.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_45.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_45.setMaxLength(1)
+        self.inputBox_45.setEchoMode(QLineEdit.Normal)
+        self.inputBox_45.setAlignment(Qt.AlignCenter)
+        self.inputBox_45.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_45.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_45, 7, 0, 1, 1)
+
+        self.inputBox_0 = QLineEdit(self.gridFrame)
+        self.inputBox_0.setObjectName(u"inputBox_0")
+        sizePolicy.setHeightForWidth(self.inputBox_0.sizePolicy().hasHeightForWidth())
+        self.inputBox_0.setSizePolicy(sizePolicy)
+        self.inputBox_0.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_0.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_0.setMaxLength(1)
+        self.inputBox_0.setEchoMode(QLineEdit.Normal)
+        self.inputBox_0.setAlignment(Qt.AlignCenter)
+        self.inputBox_0.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_0.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_0, 1, 0, 1, 1)
+
+        self.inputBox_79 = QLineEdit(self.gridFrame)
+        self.inputBox_79.setObjectName(u"inputBox_79")
+        sizePolicy.setHeightForWidth(self.inputBox_79.sizePolicy().hasHeightForWidth())
+        self.inputBox_79.setSizePolicy(sizePolicy)
+        self.inputBox_79.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_79.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_79.setMaxLength(1)
+        self.inputBox_79.setEchoMode(QLineEdit.Normal)
+        self.inputBox_79.setAlignment(Qt.AlignCenter)
+        self.inputBox_79.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_79.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_79, 11, 10, 1, 1)
+
+        self.inputBox_50 = QLineEdit(self.gridFrame)
+        self.inputBox_50.setObjectName(u"inputBox_50")
+        sizePolicy.setHeightForWidth(self.inputBox_50.sizePolicy().hasHeightForWidth())
+        self.inputBox_50.setSizePolicy(sizePolicy)
+        self.inputBox_50.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_50.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_50.setMaxLength(1)
+        self.inputBox_50.setEchoMode(QLineEdit.Normal)
+        self.inputBox_50.setAlignment(Qt.AlignCenter)
+        self.inputBox_50.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_50.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_50, 7, 6, 1, 1)
+
+        self.inputBox_70 = QLineEdit(self.gridFrame)
+        self.inputBox_70.setObjectName(u"inputBox_70")
+        sizePolicy.setHeightForWidth(self.inputBox_70.sizePolicy().hasHeightForWidth())
+        self.inputBox_70.setSizePolicy(sizePolicy)
+        self.inputBox_70.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_70.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_70.setMaxLength(1)
+        self.inputBox_70.setEchoMode(QLineEdit.Normal)
+        self.inputBox_70.setAlignment(Qt.AlignCenter)
+        self.inputBox_70.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_70.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_70, 10, 10, 1, 1)
+
+        self.inputBox_9 = QLineEdit(self.gridFrame)
+        self.inputBox_9.setObjectName(u"inputBox_9")
+        sizePolicy.setHeightForWidth(self.inputBox_9.sizePolicy().hasHeightForWidth())
+        self.inputBox_9.setSizePolicy(sizePolicy)
+        self.inputBox_9.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_9.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_9.setMaxLength(1)
+        self.inputBox_9.setEchoMode(QLineEdit.Normal)
+        self.inputBox_9.setAlignment(Qt.AlignCenter)
+        self.inputBox_9.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_9.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_9, 2, 0, 1, 1)
+
+        self.inputBox_60 = QLineEdit(self.gridFrame)
+        self.inputBox_60.setObjectName(u"inputBox_60")
+        sizePolicy.setHeightForWidth(self.inputBox_60.sizePolicy().hasHeightForWidth())
+        self.inputBox_60.setSizePolicy(sizePolicy)
+        self.inputBox_60.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_60.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_60.setMaxLength(1)
+        self.inputBox_60.setEchoMode(QLineEdit.Normal)
+        self.inputBox_60.setAlignment(Qt.AlignCenter)
+        self.inputBox_60.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_60.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_60, 9, 9, 1, 1)
+
+        self.inputBox_29 = QLineEdit(self.gridFrame)
+        self.inputBox_29.setObjectName(u"inputBox_29")
+        sizePolicy.setHeightForWidth(self.inputBox_29.sizePolicy().hasHeightForWidth())
+        self.inputBox_29.setSizePolicy(sizePolicy)
+        self.inputBox_29.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_29.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_29.setMaxLength(1)
+        self.inputBox_29.setEchoMode(QLineEdit.Normal)
+        self.inputBox_29.setAlignment(Qt.AlignCenter)
+        self.inputBox_29.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_29.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_29, 5, 2, 1, 1)
+
+        self.line_3 = QFrame(self.gridFrame)
+        self.line_3.setObjectName(u"line_3")
+        self.line_3.setFrameShadow(QFrame.Plain)
+        self.line_3.setLineWidth(100)
+        self.line_3.setMidLineWidth(0)
+        self.line_3.setFrameShape(QFrame.VLine)
+
+        self.gridLayout_2.addWidget(self.line_3, 7, 3, 1, 1)
+
+        self.inputBox_33 = QLineEdit(self.gridFrame)
+        self.inputBox_33.setObjectName(u"inputBox_33")
+        sizePolicy.setHeightForWidth(self.inputBox_33.sizePolicy().hasHeightForWidth())
+        self.inputBox_33.setSizePolicy(sizePolicy)
+        self.inputBox_33.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_33.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_33.setMaxLength(1)
+        self.inputBox_33.setEchoMode(QLineEdit.Normal)
+        self.inputBox_33.setAlignment(Qt.AlignCenter)
+        self.inputBox_33.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_33.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_33, 5, 9, 1, 1)
+
+        self.line_15 = QFrame(self.gridFrame)
+        self.line_15.setObjectName(u"line_15")
+        self.line_15.setFrameShadow(QFrame.Plain)
+        self.line_15.setLineWidth(100)
+        self.line_15.setMidLineWidth(0)
+        self.line_15.setFrameShape(QFrame.VLine)
+
+        self.gridLayout_2.addWidget(self.line_15, 5, 7, 1, 1)
+
+        self.line = QFrame(self.gridFrame)
+        self.line.setObjectName(u"line")
+        self.line.setFrameShadow(QFrame.Plain)
+        self.line.setLineWidth(100)
+        self.line.setMidLineWidth(0)
+        self.line.setFrameShape(QFrame.VLine)
+
+        self.gridLayout_2.addWidget(self.line, 6, 3, 1, 1)
+
+        self.inputBox_4 = QLineEdit(self.gridFrame)
+        self.inputBox_4.setObjectName(u"inputBox_4")
+        sizePolicy.setHeightForWidth(self.inputBox_4.sizePolicy().hasHeightForWidth())
+        self.inputBox_4.setSizePolicy(sizePolicy)
+        self.inputBox_4.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_4.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_4.setMaxLength(1)
+        self.inputBox_4.setEchoMode(QLineEdit.Normal)
+        self.inputBox_4.setAlignment(Qt.AlignCenter)
+        self.inputBox_4.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_4.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_4, 1, 5, 1, 1)
+
+        self.inputBox_12 = QLineEdit(self.gridFrame)
+        self.inputBox_12.setObjectName(u"inputBox_12")
+        sizePolicy.setHeightForWidth(self.inputBox_12.sizePolicy().hasHeightForWidth())
+        self.inputBox_12.setSizePolicy(sizePolicy)
+        self.inputBox_12.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_12.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_12.setMaxLength(1)
+        self.inputBox_12.setEchoMode(QLineEdit.Normal)
+        self.inputBox_12.setAlignment(Qt.AlignCenter)
+        self.inputBox_12.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_12.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_12, 2, 4, 1, 1)
+
+        self.inputBox_27 = QLineEdit(self.gridFrame)
+        self.inputBox_27.setObjectName(u"inputBox_27")
+        sizePolicy.setHeightForWidth(self.inputBox_27.sizePolicy().hasHeightForWidth())
+        self.inputBox_27.setSizePolicy(sizePolicy)
+        self.inputBox_27.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_27.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_27.setMaxLength(1)
+        self.inputBox_27.setEchoMode(QLineEdit.Normal)
+        self.inputBox_27.setAlignment(Qt.AlignCenter)
+        self.inputBox_27.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_27.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_27, 5, 0, 1, 1)
+
+        self.inputBox_58 = QLineEdit(self.gridFrame)
+        self.inputBox_58.setObjectName(u"inputBox_58")
+        sizePolicy.setHeightForWidth(self.inputBox_58.sizePolicy().hasHeightForWidth())
+        self.inputBox_58.setSizePolicy(sizePolicy)
+        self.inputBox_58.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_58.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_58.setMaxLength(1)
+        self.inputBox_58.setEchoMode(QLineEdit.Normal)
+        self.inputBox_58.setAlignment(Qt.AlignCenter)
+        self.inputBox_58.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_58.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_58, 9, 5, 1, 1)
+
+        self.inputBox_77 = QLineEdit(self.gridFrame)
+        self.inputBox_77.setObjectName(u"inputBox_77")
+        sizePolicy.setHeightForWidth(self.inputBox_77.sizePolicy().hasHeightForWidth())
+        self.inputBox_77.setSizePolicy(sizePolicy)
+        self.inputBox_77.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_77.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_77.setMaxLength(1)
+        self.inputBox_77.setEchoMode(QLineEdit.Normal)
+        self.inputBox_77.setAlignment(Qt.AlignCenter)
+        self.inputBox_77.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_77.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_77, 11, 6, 1, 1)
+
+        self.line_23 = QFrame(self.gridFrame)
+        self.line_23.setObjectName(u"line_23")
+        self.line_23.setFrameShadow(QFrame.Plain)
+        self.line_23.setLineWidth(100)
+        self.line_23.setMidLineWidth(0)
+        self.line_23.setFrameShape(QFrame.HLine)
+
+        self.gridLayout_2.addWidget(self.line_23, 4, 5, 1, 1)
+
+        self.inputBox_57 = QLineEdit(self.gridFrame)
+        self.inputBox_57.setObjectName(u"inputBox_57")
+        sizePolicy.setHeightForWidth(self.inputBox_57.sizePolicy().hasHeightForWidth())
+        self.inputBox_57.setSizePolicy(sizePolicy)
+        self.inputBox_57.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_57.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_57.setMaxLength(1)
+        self.inputBox_57.setEchoMode(QLineEdit.Normal)
+        self.inputBox_57.setAlignment(Qt.AlignCenter)
+        self.inputBox_57.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_57.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_57, 9, 4, 1, 1)
+
+        self.inputBox_40 = QLineEdit(self.gridFrame)
+        self.inputBox_40.setObjectName(u"inputBox_40")
+        sizePolicy.setHeightForWidth(self.inputBox_40.sizePolicy().hasHeightForWidth())
+        self.inputBox_40.setSizePolicy(sizePolicy)
+        self.inputBox_40.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_40.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_40.setMaxLength(1)
+        self.inputBox_40.setEchoMode(QLineEdit.Normal)
+        self.inputBox_40.setAlignment(Qt.AlignCenter)
+        self.inputBox_40.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_40.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_40, 6, 5, 1, 1)
+
+        self.inputBox_47 = QLineEdit(self.gridFrame)
+        self.inputBox_47.setObjectName(u"inputBox_47")
+        sizePolicy.setHeightForWidth(self.inputBox_47.sizePolicy().hasHeightForWidth())
+        self.inputBox_47.setSizePolicy(sizePolicy)
+        self.inputBox_47.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_47.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_47.setMaxLength(1)
+        self.inputBox_47.setEchoMode(QLineEdit.Normal)
+        self.inputBox_47.setAlignment(Qt.AlignCenter)
+        self.inputBox_47.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_47.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_47, 7, 2, 1, 1)
+
+        self.inputBox_71 = QLineEdit(self.gridFrame)
+        self.inputBox_71.setObjectName(u"inputBox_71")
+        sizePolicy.setHeightForWidth(self.inputBox_71.sizePolicy().hasHeightForWidth())
+        self.inputBox_71.setSizePolicy(sizePolicy)
+        self.inputBox_71.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_71.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_71.setMaxLength(1)
+        self.inputBox_71.setEchoMode(QLineEdit.Normal)
+        self.inputBox_71.setAlignment(Qt.AlignCenter)
+        self.inputBox_71.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_71.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_71, 10, 11, 1, 1)
+
+        self.inputBox_74 = QLineEdit(self.gridFrame)
+        self.inputBox_74.setObjectName(u"inputBox_74")
+        sizePolicy.setHeightForWidth(self.inputBox_74.sizePolicy().hasHeightForWidth())
+        self.inputBox_74.setSizePolicy(sizePolicy)
+        self.inputBox_74.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_74.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_74.setMaxLength(1)
+        self.inputBox_74.setEchoMode(QLineEdit.Normal)
+        self.inputBox_74.setAlignment(Qt.AlignCenter)
+        self.inputBox_74.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_74.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_74, 11, 2, 1, 1)
+
+        self.inputBox_19 = QLineEdit(self.gridFrame)
+        self.inputBox_19.setObjectName(u"inputBox_19")
+        sizePolicy.setHeightForWidth(self.inputBox_19.sizePolicy().hasHeightForWidth())
+        self.inputBox_19.setSizePolicy(sizePolicy)
+        self.inputBox_19.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_19.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_19.setMaxLength(1)
+        self.inputBox_19.setEchoMode(QLineEdit.Normal)
+        self.inputBox_19.setAlignment(Qt.AlignCenter)
+        self.inputBox_19.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_19.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_19, 3, 1, 1, 1)
+
+        self.inputBox_5 = QLineEdit(self.gridFrame)
+        self.inputBox_5.setObjectName(u"inputBox_5")
+        sizePolicy.setHeightForWidth(self.inputBox_5.sizePolicy().hasHeightForWidth())
+        self.inputBox_5.setSizePolicy(sizePolicy)
+        self.inputBox_5.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_5.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_5.setMaxLength(1)
+        self.inputBox_5.setEchoMode(QLineEdit.Normal)
+        self.inputBox_5.setAlignment(Qt.AlignCenter)
+        self.inputBox_5.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_5.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_5, 1, 6, 1, 1)
+
+        self.inputBox_44 = QLineEdit(self.gridFrame)
+        self.inputBox_44.setObjectName(u"inputBox_44")
+        sizePolicy.setHeightForWidth(self.inputBox_44.sizePolicy().hasHeightForWidth())
+        self.inputBox_44.setSizePolicy(sizePolicy)
+        self.inputBox_44.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_44.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_44.setMaxLength(1)
+        self.inputBox_44.setEchoMode(QLineEdit.Normal)
+        self.inputBox_44.setAlignment(Qt.AlignCenter)
+        self.inputBox_44.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_44.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_44, 6, 11, 1, 1)
+
+        self.inputBox_32 = QLineEdit(self.gridFrame)
+        self.inputBox_32.setObjectName(u"inputBox_32")
+        sizePolicy.setHeightForWidth(self.inputBox_32.sizePolicy().hasHeightForWidth())
+        self.inputBox_32.setSizePolicy(sizePolicy)
+        self.inputBox_32.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_32.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_32.setMaxLength(1)
+        self.inputBox_32.setEchoMode(QLineEdit.Normal)
+        self.inputBox_32.setAlignment(Qt.AlignCenter)
+        self.inputBox_32.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_32.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_32, 5, 6, 1, 1)
+
+        self.inputBox_7 = QLineEdit(self.gridFrame)
+        self.inputBox_7.setObjectName(u"inputBox_7")
+        sizePolicy.setHeightForWidth(self.inputBox_7.sizePolicy().hasHeightForWidth())
+        self.inputBox_7.setSizePolicy(sizePolicy)
+        self.inputBox_7.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_7.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_7.setMaxLength(1)
+        self.inputBox_7.setEchoMode(QLineEdit.Normal)
+        self.inputBox_7.setAlignment(Qt.AlignCenter)
+        self.inputBox_7.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_7.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_7, 1, 10, 1, 1)
+
+        self.line_21 = QFrame(self.gridFrame)
+        self.line_21.setObjectName(u"line_21")
+        self.line_21.setFrameShadow(QFrame.Plain)
+        self.line_21.setLineWidth(100)
+        self.line_21.setMidLineWidth(0)
+        self.line_21.setFrameShape(QFrame.HLine)
+
+        self.gridLayout_2.addWidget(self.line_21, 4, 2, 1, 1)
+
+        self.line_29 = QFrame(self.gridFrame)
+        self.line_29.setObjectName(u"line_29")
+        self.line_29.setFrameShadow(QFrame.Plain)
+        self.line_29.setLineWidth(100)
+        self.line_29.setMidLineWidth(0)
+        self.line_29.setFrameShape(QFrame.HLine)
+
+        self.gridLayout_2.addWidget(self.line_29, 8, 10, 1, 1)
+
+        self.inputBox_64 = QLineEdit(self.gridFrame)
+        self.inputBox_64.setObjectName(u"inputBox_64")
+        sizePolicy.setHeightForWidth(self.inputBox_64.sizePolicy().hasHeightForWidth())
+        self.inputBox_64.setSizePolicy(sizePolicy)
+        self.inputBox_64.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_64.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_64.setMaxLength(1)
+        self.inputBox_64.setEchoMode(QLineEdit.Normal)
+        self.inputBox_64.setAlignment(Qt.AlignCenter)
+        self.inputBox_64.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_64.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_64, 10, 1, 1, 1)
+
+        self.line_30 = QFrame(self.gridFrame)
+        self.line_30.setObjectName(u"line_30")
+        self.line_30.setFrameShadow(QFrame.Plain)
+        self.line_30.setLineWidth(100)
+        self.line_30.setMidLineWidth(0)
+        self.line_30.setFrameShape(QFrame.HLine)
+
+        self.gridLayout_2.addWidget(self.line_30, 8, 9, 1, 1)
+
+        self.line_16 = QFrame(self.gridFrame)
+        self.line_16.setObjectName(u"line_16")
+        self.line_16.setFrameShadow(QFrame.Plain)
+        self.line_16.setLineWidth(100)
+        self.line_16.setMidLineWidth(0)
+        self.line_16.setFrameShape(QFrame.VLine)
+
+        self.gridLayout_2.addWidget(self.line_16, 3, 7, 1, 1)
+
+        self.line_8 = QFrame(self.gridFrame)
+        self.line_8.setObjectName(u"line_8")
+        self.line_8.setFrameShadow(QFrame.Plain)
+        self.line_8.setLineWidth(100)
+        self.line_8.setMidLineWidth(0)
+        self.line_8.setFrameShape(QFrame.VLine)
+
+        self.gridLayout_2.addWidget(self.line_8, 2, 3, 1, 1)
+
+        self.inputBox_69 = QLineEdit(self.gridFrame)
+        self.inputBox_69.setObjectName(u"inputBox_69")
+        sizePolicy.setHeightForWidth(self.inputBox_69.sizePolicy().hasHeightForWidth())
+        self.inputBox_69.setSizePolicy(sizePolicy)
+        self.inputBox_69.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_69.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_69.setMaxLength(1)
+        self.inputBox_69.setEchoMode(QLineEdit.Normal)
+        self.inputBox_69.setAlignment(Qt.AlignCenter)
+        self.inputBox_69.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_69.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_69, 10, 9, 1, 1)
+
+        self.inputBox_43 = QLineEdit(self.gridFrame)
+        self.inputBox_43.setObjectName(u"inputBox_43")
+        sizePolicy.setHeightForWidth(self.inputBox_43.sizePolicy().hasHeightForWidth())
+        self.inputBox_43.setSizePolicy(sizePolicy)
+        self.inputBox_43.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_43.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_43.setMaxLength(1)
+        self.inputBox_43.setEchoMode(QLineEdit.Normal)
+        self.inputBox_43.setAlignment(Qt.AlignCenter)
+        self.inputBox_43.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_43.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_43, 6, 10, 1, 1)
+
+        self.inputBox_53 = QLineEdit(self.gridFrame)
+        self.inputBox_53.setObjectName(u"inputBox_53")
+        sizePolicy.setHeightForWidth(self.inputBox_53.sizePolicy().hasHeightForWidth())
+        self.inputBox_53.setSizePolicy(sizePolicy)
+        self.inputBox_53.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_53.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_53.setMaxLength(1)
+        self.inputBox_53.setEchoMode(QLineEdit.Normal)
+        self.inputBox_53.setAlignment(Qt.AlignCenter)
+        self.inputBox_53.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_53.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_53, 7, 11, 1, 1)
+
+        self.line_7 = QFrame(self.gridFrame)
+        self.line_7.setObjectName(u"line_7")
+        self.line_7.setFrameShadow(QFrame.Plain)
+        self.line_7.setLineWidth(100)
+        self.line_7.setMidLineWidth(0)
+        self.line_7.setFrameShape(QFrame.VLine)
+
+        self.gridLayout_2.addWidget(self.line_7, 3, 3, 1, 1)
+
+        self.inputBox_8 = QLineEdit(self.gridFrame)
+        self.inputBox_8.setObjectName(u"inputBox_8")
+        sizePolicy.setHeightForWidth(self.inputBox_8.sizePolicy().hasHeightForWidth())
+        self.inputBox_8.setSizePolicy(sizePolicy)
+        self.inputBox_8.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_8.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_8.setMaxLength(1)
+        self.inputBox_8.setEchoMode(QLineEdit.Normal)
+        self.inputBox_8.setAlignment(Qt.AlignCenter)
+        self.inputBox_8.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_8.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_8, 1, 11, 1, 1)
+
+        self.inputBox_67 = QLineEdit(self.gridFrame)
+        self.inputBox_67.setObjectName(u"inputBox_67")
+        sizePolicy.setHeightForWidth(self.inputBox_67.sizePolicy().hasHeightForWidth())
+        self.inputBox_67.setSizePolicy(sizePolicy)
+        self.inputBox_67.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_67.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_67.setMaxLength(1)
+        self.inputBox_67.setEchoMode(QLineEdit.Normal)
+        self.inputBox_67.setAlignment(Qt.AlignCenter)
+        self.inputBox_67.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_67.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_67, 10, 5, 1, 1)
+
+        self.inputBox_18 = QLineEdit(self.gridFrame)
+        self.inputBox_18.setObjectName(u"inputBox_18")
+        sizePolicy.setHeightForWidth(self.inputBox_18.sizePolicy().hasHeightForWidth())
+        self.inputBox_18.setSizePolicy(sizePolicy)
+        self.inputBox_18.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_18.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_18.setMaxLength(1)
+        self.inputBox_18.setEchoMode(QLineEdit.Normal)
+        self.inputBox_18.setAlignment(Qt.AlignCenter)
+        self.inputBox_18.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_18.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_18, 3, 0, 1, 1)
+
+        self.inputBox_52 = QLineEdit(self.gridFrame)
+        self.inputBox_52.setObjectName(u"inputBox_52")
+        sizePolicy.setHeightForWidth(self.inputBox_52.sizePolicy().hasHeightForWidth())
+        self.inputBox_52.setSizePolicy(sizePolicy)
+        self.inputBox_52.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_52.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_52.setMaxLength(1)
+        self.inputBox_52.setEchoMode(QLineEdit.Normal)
+        self.inputBox_52.setAlignment(Qt.AlignCenter)
+        self.inputBox_52.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_52.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_52, 7, 10, 1, 1)
+
+        self.inputBox_20 = QLineEdit(self.gridFrame)
+        self.inputBox_20.setObjectName(u"inputBox_20")
+        sizePolicy.setHeightForWidth(self.inputBox_20.sizePolicy().hasHeightForWidth())
+        self.inputBox_20.setSizePolicy(sizePolicy)
+        self.inputBox_20.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_20.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_20.setMaxLength(1)
+        self.inputBox_20.setEchoMode(QLineEdit.Normal)
+        self.inputBox_20.setAlignment(Qt.AlignCenter)
+        self.inputBox_20.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_20.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_20, 3, 2, 1, 1)
+
+        self.inputBox_21 = QLineEdit(self.gridFrame)
+        self.inputBox_21.setObjectName(u"inputBox_21")
+        sizePolicy.setHeightForWidth(self.inputBox_21.sizePolicy().hasHeightForWidth())
+        self.inputBox_21.setSizePolicy(sizePolicy)
+        self.inputBox_21.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_21.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_21.setMaxLength(1)
+        self.inputBox_21.setEchoMode(QLineEdit.Normal)
+        self.inputBox_21.setAlignment(Qt.AlignCenter)
+        self.inputBox_21.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_21.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_21, 3, 4, 1, 1)
+
+        self.inputBox_30 = QLineEdit(self.gridFrame)
+        self.inputBox_30.setObjectName(u"inputBox_30")
+        sizePolicy.setHeightForWidth(self.inputBox_30.sizePolicy().hasHeightForWidth())
+        self.inputBox_30.setSizePolicy(sizePolicy)
+        self.inputBox_30.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_30.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_30.setMaxLength(1)
+        self.inputBox_30.setEchoMode(QLineEdit.Normal)
+        self.inputBox_30.setAlignment(Qt.AlignCenter)
+        self.inputBox_30.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_30.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_30, 5, 4, 1, 1)
+
+        self.inputBox_56 = QLineEdit(self.gridFrame)
+        self.inputBox_56.setObjectName(u"inputBox_56")
+        sizePolicy.setHeightForWidth(self.inputBox_56.sizePolicy().hasHeightForWidth())
+        self.inputBox_56.setSizePolicy(sizePolicy)
+        self.inputBox_56.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_56.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_56.setMaxLength(1)
+        self.inputBox_56.setEchoMode(QLineEdit.Normal)
+        self.inputBox_56.setAlignment(Qt.AlignCenter)
+        self.inputBox_56.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_56.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_56, 9, 2, 1, 1)
+
+        self.inputBox_28 = QLineEdit(self.gridFrame)
+        self.inputBox_28.setObjectName(u"inputBox_28")
+        sizePolicy.setHeightForWidth(self.inputBox_28.sizePolicy().hasHeightForWidth())
+        self.inputBox_28.setSizePolicy(sizePolicy)
+        self.inputBox_28.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_28.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_28.setMaxLength(1)
+        self.inputBox_28.setEchoMode(QLineEdit.Normal)
+        self.inputBox_28.setAlignment(Qt.AlignCenter)
+        self.inputBox_28.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_28.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_28, 5, 1, 1, 1)
+
+        self.line_20 = QFrame(self.gridFrame)
+        self.line_20.setObjectName(u"line_20")
+        self.line_20.setFrameShadow(QFrame.Plain)
+        self.line_20.setLineWidth(100)
+        self.line_20.setMidLineWidth(0)
+        self.line_20.setFrameShape(QFrame.HLine)
+
+        self.gridLayout_2.addWidget(self.line_20, 4, 1, 1, 1)
+
+        self.inputBox_62 = QLineEdit(self.gridFrame)
+        self.inputBox_62.setObjectName(u"inputBox_62")
+        sizePolicy.setHeightForWidth(self.inputBox_62.sizePolicy().hasHeightForWidth())
+        self.inputBox_62.setSizePolicy(sizePolicy)
+        self.inputBox_62.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_62.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_62.setMaxLength(1)
+        self.inputBox_62.setEchoMode(QLineEdit.Normal)
+        self.inputBox_62.setAlignment(Qt.AlignCenter)
+        self.inputBox_62.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_62.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_62, 9, 11, 1, 1)
+
+        self.line_34 = QFrame(self.gridFrame)
+        self.line_34.setObjectName(u"line_34")
+        self.line_34.setFrameShadow(QFrame.Plain)
+        self.line_34.setLineWidth(100)
+        self.line_34.setMidLineWidth(0)
+        self.line_34.setFrameShape(QFrame.HLine)
+
+        self.gridLayout_2.addWidget(self.line_34, 8, 2, 1, 1)
+
+        self.line_28 = QFrame(self.gridFrame)
+        self.line_28.setObjectName(u"line_28")
+        self.line_28.setFrameShadow(QFrame.Plain)
+        self.line_28.setLineWidth(100)
+        self.line_28.setMidLineWidth(0)
+        self.line_28.setFrameShape(QFrame.HLine)
+
+        self.gridLayout_2.addWidget(self.line_28, 8, 11, 1, 1)
+
+        self.inputBox_78 = QLineEdit(self.gridFrame)
+        self.inputBox_78.setObjectName(u"inputBox_78")
+        sizePolicy.setHeightForWidth(self.inputBox_78.sizePolicy().hasHeightForWidth())
+        self.inputBox_78.setSizePolicy(sizePolicy)
+        self.inputBox_78.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_78.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_78.setMaxLength(1)
+        self.inputBox_78.setEchoMode(QLineEdit.Normal)
+        self.inputBox_78.setAlignment(Qt.AlignCenter)
+        self.inputBox_78.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_78.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_78, 11, 9, 1, 1)
+
+        self.inputBox_3 = QLineEdit(self.gridFrame)
+        self.inputBox_3.setObjectName(u"inputBox_3")
+        sizePolicy.setHeightForWidth(self.inputBox_3.sizePolicy().hasHeightForWidth())
+        self.inputBox_3.setSizePolicy(sizePolicy)
+        self.inputBox_3.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_3.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_3.setMaxLength(1)
+        self.inputBox_3.setEchoMode(QLineEdit.Normal)
+        self.inputBox_3.setAlignment(Qt.AlignCenter)
+        self.inputBox_3.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_3.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_3, 1, 4, 1, 1)
+
+        self.inputBox_75 = QLineEdit(self.gridFrame)
+        self.inputBox_75.setObjectName(u"inputBox_75")
+        sizePolicy.setHeightForWidth(self.inputBox_75.sizePolicy().hasHeightForWidth())
+        self.inputBox_75.setSizePolicy(sizePolicy)
+        self.inputBox_75.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_75.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_75.setMaxLength(1)
+        self.inputBox_75.setEchoMode(QLineEdit.Normal)
+        self.inputBox_75.setAlignment(Qt.AlignCenter)
+        self.inputBox_75.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_75.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_75, 11, 4, 1, 1)
+
+        self.line_13 = QFrame(self.gridFrame)
+        self.line_13.setObjectName(u"line_13")
+        self.line_13.setFrameShadow(QFrame.Plain)
+        self.line_13.setLineWidth(100)
+        self.line_13.setMidLineWidth(0)
+        self.line_13.setFrameShape(QFrame.VLine)
+
+        self.gridLayout_2.addWidget(self.line_13, 7, 7, 1, 1)
+
+        self.inputBox_36 = QLineEdit(self.gridFrame)
+        self.inputBox_36.setObjectName(u"inputBox_36")
+        sizePolicy.setHeightForWidth(self.inputBox_36.sizePolicy().hasHeightForWidth())
+        self.inputBox_36.setSizePolicy(sizePolicy)
+        self.inputBox_36.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_36.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_36.setMaxLength(1)
+        self.inputBox_36.setEchoMode(QLineEdit.Normal)
+        self.inputBox_36.setAlignment(Qt.AlignCenter)
+        self.inputBox_36.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_36.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_36, 6, 0, 1, 1)
+
+        self.inputBox_13 = QLineEdit(self.gridFrame)
+        self.inputBox_13.setObjectName(u"inputBox_13")
+        sizePolicy.setHeightForWidth(self.inputBox_13.sizePolicy().hasHeightForWidth())
+        self.inputBox_13.setSizePolicy(sizePolicy)
+        self.inputBox_13.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_13.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_13.setMaxLength(1)
+        self.inputBox_13.setEchoMode(QLineEdit.Normal)
+        self.inputBox_13.setAlignment(Qt.AlignCenter)
+        self.inputBox_13.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_13.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_13, 2, 5, 1, 1)
+
+        self.inputBox_54 = QLineEdit(self.gridFrame)
+        self.inputBox_54.setObjectName(u"inputBox_54")
+        sizePolicy.setHeightForWidth(self.inputBox_54.sizePolicy().hasHeightForWidth())
+        self.inputBox_54.setSizePolicy(sizePolicy)
+        self.inputBox_54.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_54.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_54.setMaxLength(1)
+        self.inputBox_54.setEchoMode(QLineEdit.Normal)
+        self.inputBox_54.setAlignment(Qt.AlignCenter)
+        self.inputBox_54.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_54.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_54, 9, 0, 1, 1)
+
+        self.line_32 = QFrame(self.gridFrame)
+        self.line_32.setObjectName(u"line_32")
+        self.line_32.setFrameShadow(QFrame.Plain)
+        self.line_32.setLineWidth(100)
+        self.line_32.setMidLineWidth(0)
+        self.line_32.setFrameShape(QFrame.HLine)
+
+        self.gridLayout_2.addWidget(self.line_32, 8, 5, 1, 1)
+
+        self.inputBox_6 = QLineEdit(self.gridFrame)
+        self.inputBox_6.setObjectName(u"inputBox_6")
+        sizePolicy.setHeightForWidth(self.inputBox_6.sizePolicy().hasHeightForWidth())
+        self.inputBox_6.setSizePolicy(sizePolicy)
+        self.inputBox_6.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_6.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_6.setMaxLength(1)
+        self.inputBox_6.setEchoMode(QLineEdit.Normal)
+        self.inputBox_6.setAlignment(Qt.AlignCenter)
+        self.inputBox_6.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_6.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_6, 1, 9, 1, 1)
+
+        self.inputBox_51 = QLineEdit(self.gridFrame)
+        self.inputBox_51.setObjectName(u"inputBox_51")
+        sizePolicy.setHeightForWidth(self.inputBox_51.sizePolicy().hasHeightForWidth())
+        self.inputBox_51.setSizePolicy(sizePolicy)
+        self.inputBox_51.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_51.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_51.setMaxLength(1)
+        self.inputBox_51.setEchoMode(QLineEdit.Normal)
+        self.inputBox_51.setAlignment(Qt.AlignCenter)
+        self.inputBox_51.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_51.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_51, 7, 9, 1, 1)
+
+        self.inputBox_15 = QLineEdit(self.gridFrame)
+        self.inputBox_15.setObjectName(u"inputBox_15")
+        sizePolicy.setHeightForWidth(self.inputBox_15.sizePolicy().hasHeightForWidth())
+        self.inputBox_15.setSizePolicy(sizePolicy)
+        self.inputBox_15.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_15.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_15.setMaxLength(1)
+        self.inputBox_15.setEchoMode(QLineEdit.Normal)
+        self.inputBox_15.setAlignment(Qt.AlignCenter)
+        self.inputBox_15.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_15.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_15, 2, 9, 1, 1)
+
+        self.inputBox_26 = QLineEdit(self.gridFrame)
+        self.inputBox_26.setObjectName(u"inputBox_26")
+        sizePolicy.setHeightForWidth(self.inputBox_26.sizePolicy().hasHeightForWidth())
+        self.inputBox_26.setSizePolicy(sizePolicy)
+        self.inputBox_26.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_26.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_26.setMaxLength(1)
+        self.inputBox_26.setEchoMode(QLineEdit.Normal)
+        self.inputBox_26.setAlignment(Qt.AlignCenter)
+        self.inputBox_26.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_26.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_26, 3, 11, 1, 1)
+
+        self.inputBox_39 = QLineEdit(self.gridFrame)
+        self.inputBox_39.setObjectName(u"inputBox_39")
+        sizePolicy.setHeightForWidth(self.inputBox_39.sizePolicy().hasHeightForWidth())
+        self.inputBox_39.setSizePolicy(sizePolicy)
+        self.inputBox_39.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_39.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_39.setMaxLength(1)
+        self.inputBox_39.setEchoMode(QLineEdit.Normal)
+        self.inputBox_39.setAlignment(Qt.AlignCenter)
+        self.inputBox_39.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_39.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_39, 6, 4, 1, 1)
+
+        self.inputBox_73 = QLineEdit(self.gridFrame)
+        self.inputBox_73.setObjectName(u"inputBox_73")
+        sizePolicy.setHeightForWidth(self.inputBox_73.sizePolicy().hasHeightForWidth())
+        self.inputBox_73.setSizePolicy(sizePolicy)
+        self.inputBox_73.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_73.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_73.setMaxLength(1)
+        self.inputBox_73.setEchoMode(QLineEdit.Normal)
+        self.inputBox_73.setAlignment(Qt.AlignCenter)
+        self.inputBox_73.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_73.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_73, 11, 1, 1, 1)
+
+        self.line_37 = QFrame(self.gridFrame)
+        self.line_37.setObjectName(u"line_37")
+        self.line_37.setFrameShadow(QFrame.Plain)
+        self.line_37.setLineWidth(100)
+        self.line_37.setMidLineWidth(0)
+        self.line_37.setFrameShape(QFrame.HLine)
+
+        self.gridLayout_2.addWidget(self.line_37, 8, 0, 1, 1)
+
+        self.inputBox_76 = QLineEdit(self.gridFrame)
+        self.inputBox_76.setObjectName(u"inputBox_76")
+        sizePolicy.setHeightForWidth(self.inputBox_76.sizePolicy().hasHeightForWidth())
+        self.inputBox_76.setSizePolicy(sizePolicy)
+        self.inputBox_76.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_76.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_76.setMaxLength(1)
+        self.inputBox_76.setEchoMode(QLineEdit.Normal)
+        self.inputBox_76.setAlignment(Qt.AlignCenter)
+        self.inputBox_76.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_76.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_76, 11, 5, 1, 1)
+
+        self.inputBox_80 = QLineEdit(self.gridFrame)
+        self.inputBox_80.setObjectName(u"inputBox_80")
+        sizePolicy.setHeightForWidth(self.inputBox_80.sizePolicy().hasHeightForWidth())
+        self.inputBox_80.setSizePolicy(sizePolicy)
+        self.inputBox_80.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_80.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_80.setMaxLength(1)
+        self.inputBox_80.setEchoMode(QLineEdit.Normal)
+        self.inputBox_80.setAlignment(Qt.AlignCenter)
+        self.inputBox_80.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_80.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_80, 11, 11, 1, 1)
+
+        self.line_19 = QFrame(self.gridFrame)
+        self.line_19.setObjectName(u"line_19")
+        self.line_19.setFrameShadow(QFrame.Plain)
+        self.line_19.setLineWidth(100)
+        self.line_19.setMidLineWidth(0)
+        self.line_19.setFrameShape(QFrame.HLine)
+
+        self.gridLayout_2.addWidget(self.line_19, 4, 0, 1, 1)
+
+        self.inputBox_34 = QLineEdit(self.gridFrame)
+        self.inputBox_34.setObjectName(u"inputBox_34")
+        sizePolicy.setHeightForWidth(self.inputBox_34.sizePolicy().hasHeightForWidth())
+        self.inputBox_34.setSizePolicy(sizePolicy)
+        self.inputBox_34.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_34.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_34.setMaxLength(1)
+        self.inputBox_34.setEchoMode(QLineEdit.Normal)
+        self.inputBox_34.setAlignment(Qt.AlignCenter)
+        self.inputBox_34.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_34.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_34, 5, 10, 1, 1)
+
+        self.inputBox_10 = QLineEdit(self.gridFrame)
+        self.inputBox_10.setObjectName(u"inputBox_10")
+        sizePolicy.setHeightForWidth(self.inputBox_10.sizePolicy().hasHeightForWidth())
+        self.inputBox_10.setSizePolicy(sizePolicy)
+        self.inputBox_10.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_10.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_10.setMaxLength(1)
+        self.inputBox_10.setEchoMode(QLineEdit.Normal)
+        self.inputBox_10.setAlignment(Qt.AlignCenter)
+        self.inputBox_10.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_10.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_10, 2, 1, 1, 1)
+
+        self.inputBox_46 = QLineEdit(self.gridFrame)
+        self.inputBox_46.setObjectName(u"inputBox_46")
+        sizePolicy.setHeightForWidth(self.inputBox_46.sizePolicy().hasHeightForWidth())
+        self.inputBox_46.setSizePolicy(sizePolicy)
+        self.inputBox_46.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_46.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_46.setMaxLength(1)
+        self.inputBox_46.setEchoMode(QLineEdit.Normal)
+        self.inputBox_46.setAlignment(Qt.AlignCenter)
+        self.inputBox_46.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_46.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_46, 7, 1, 1, 1)
+
+        self.line_9 = QFrame(self.gridFrame)
+        self.line_9.setObjectName(u"line_9")
+        self.line_9.setFrameShadow(QFrame.Plain)
+        self.line_9.setLineWidth(100)
+        self.line_9.setMidLineWidth(0)
+        self.line_9.setFrameShape(QFrame.VLine)
+
+        self.gridLayout_2.addWidget(self.line_9, 1, 3, 1, 1)
+
+        self.line_10 = QFrame(self.gridFrame)
+        self.line_10.setObjectName(u"line_10")
+        self.line_10.setFrameShadow(QFrame.Plain)
+        self.line_10.setLineWidth(100)
+        self.line_10.setMidLineWidth(0)
+        self.line_10.setFrameShape(QFrame.VLine)
+
+        self.gridLayout_2.addWidget(self.line_10, 10, 7, 1, 1)
+
+        self.line_11 = QFrame(self.gridFrame)
+        self.line_11.setObjectName(u"line_11")
+        self.line_11.setFrameShadow(QFrame.Plain)
+        self.line_11.setLineWidth(100)
+        self.line_11.setMidLineWidth(0)
+        self.line_11.setFrameShape(QFrame.VLine)
+
+        self.gridLayout_2.addWidget(self.line_11, 11, 7, 1, 1)
+
+        self.inputBox_2 = QLineEdit(self.gridFrame)
+        self.inputBox_2.setObjectName(u"inputBox_2")
+        sizePolicy.setHeightForWidth(self.inputBox_2.sizePolicy().hasHeightForWidth())
+        self.inputBox_2.setSizePolicy(sizePolicy)
+        self.inputBox_2.setCursor(QCursor(Qt.ArrowCursor))
+        self.inputBox_2.setFocusPolicy(Qt.ClickFocus)
+        self.inputBox_2.setMaxLength(1)
+        self.inputBox_2.setEchoMode(QLineEdit.Normal)
+        self.inputBox_2.setAlignment(Qt.AlignCenter)
+        self.inputBox_2.setCursorMoveStyle(Qt.LogicalMoveStyle)
+        self.inputBox_2.setClearButtonEnabled(False)
+
+        self.gridLayout_2.addWidget(self.inputBox_2, 1, 2, 1, 1)
+
+        self.gridLayout.addLayout(self.gridLayout_2, 1, 0, 1, 1)
+
+        self.pb_1 = QPushButton(SudokuSolver)
+        self.pb_1.setObjectName(u"pb_1")
+        self.pb_1.setGeometry(QRect(580, 180, 100, 100))
+        palette = QPalette()
+        brush = QBrush(QColor(20, 126, 255, 255))
+        brush.setStyle(Qt.SolidPattern)
+        palette.setBrush(QPalette.Active, QPalette.WindowText, brush)
+        brush1 = QBrush(QColor(220, 232, 244, 255))
+        brush1.setStyle(Qt.SolidPattern)
+        palette.setBrush(QPalette.Active, QPalette.Button, brush1)
+        brush2 = QBrush(QColor(255, 255, 255, 255))
+        brush2.setStyle(Qt.SolidPattern)
+        palette.setBrush(QPalette.Active, QPalette.Light, brush2)
+        palette.setBrush(QPalette.Active, QPalette.Midlight, brush2)
+        brush3 = QBrush(QColor(127, 127, 127, 255))
+        brush3.setStyle(Qt.SolidPattern)
+        palette.setBrush(QPalette.Active, QPalette.Dark, brush3)
+        brush4 = QBrush(QColor(170, 170, 170, 255))
+        brush4.setStyle(Qt.SolidPattern)
+        palette.setBrush(QPalette.Active, QPalette.Mid, brush4)
+        palette.setBrush(QPalette.Active, QPalette.Text, brush)
+        palette.setBrush(QPalette.Active, QPalette.BrightText, brush2)
+        palette.setBrush(QPalette.Active, QPalette.ButtonText, brush)
+        palette.setBrush(QPalette.Active, QPalette.Base, brush1)
+        palette.setBrush(QPalette.Active, QPalette.Window, brush1)
+        brush5 = QBrush(QColor(0, 0, 0, 255))
+        brush5.setStyle(Qt.SolidPattern)
+        palette.setBrush(QPalette.Active, QPalette.Shadow, brush5)
+        palette.setBrush(QPalette.Active, QPalette.AlternateBase, brush2)
+        brush6 = QBrush(QColor(255, 255, 220, 255))
+        brush6.setStyle(Qt.SolidPattern)
+        palette.setBrush(QPalette.Active, QPalette.ToolTipBase, brush6)
+        palette.setBrush(QPalette.Active, QPalette.ToolTipText, brush5)
+        brush7 = QBrush(QColor(0, 0, 0, 128))
+        brush7.setStyle(Qt.SolidPattern)
+        # if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
+        palette.setBrush(QPalette.Active, QPalette.PlaceholderText, brush7)
+        # endif
+        palette.setBrush(QPalette.Inactive, QPalette.WindowText, brush)
+        palette.setBrush(QPalette.Inactive, QPalette.Button, brush1)
+        palette.setBrush(QPalette.Inactive, QPalette.Light, brush2)
+        palette.setBrush(QPalette.Inactive, QPalette.Midlight, brush2)
+        palette.setBrush(QPalette.Inactive, QPalette.Dark, brush3)
+        palette.setBrush(QPalette.Inactive, QPalette.Mid, brush4)
+        palette.setBrush(QPalette.Inactive, QPalette.Text, brush)
+        palette.setBrush(QPalette.Inactive, QPalette.BrightText, brush2)
+        palette.setBrush(QPalette.Inactive, QPalette.ButtonText, brush)
+        palette.setBrush(QPalette.Inactive, QPalette.Base, brush1)
+        palette.setBrush(QPalette.Inactive, QPalette.Window, brush1)
+        palette.setBrush(QPalette.Inactive, QPalette.Shadow, brush5)
+        palette.setBrush(QPalette.Inactive, QPalette.AlternateBase, brush2)
+        palette.setBrush(QPalette.Inactive, QPalette.ToolTipBase, brush6)
+        palette.setBrush(QPalette.Inactive, QPalette.ToolTipText, brush5)
+        # if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
+        palette.setBrush(QPalette.Inactive, QPalette.PlaceholderText, brush7)
+        # endif
+        palette.setBrush(QPalette.Disabled, QPalette.WindowText, brush)
+        palette.setBrush(QPalette.Disabled, QPalette.Button, brush1)
+        palette.setBrush(QPalette.Disabled, QPalette.Light, brush2)
+        palette.setBrush(QPalette.Disabled, QPalette.Midlight, brush2)
+        palette.setBrush(QPalette.Disabled, QPalette.Dark, brush3)
+        palette.setBrush(QPalette.Disabled, QPalette.Mid, brush4)
+        palette.setBrush(QPalette.Disabled, QPalette.Text, brush)
+        palette.setBrush(QPalette.Disabled, QPalette.BrightText, brush2)
+        palette.setBrush(QPalette.Disabled, QPalette.ButtonText, brush)
+        palette.setBrush(QPalette.Disabled, QPalette.Base, brush1)
+        palette.setBrush(QPalette.Disabled, QPalette.Window, brush1)
+        palette.setBrush(QPalette.Disabled, QPalette.Shadow, brush5)
+        palette.setBrush(QPalette.Disabled, QPalette.AlternateBase, brush2)
+        palette.setBrush(QPalette.Disabled, QPalette.ToolTipBase, brush6)
+        palette.setBrush(QPalette.Disabled, QPalette.ToolTipText, brush5)
+        # if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
+        palette.setBrush(QPalette.Disabled, QPalette.PlaceholderText, brush7)
+        # endif
+        self.pb_1.setPalette(palette)
+        font1 = QFont()
+        font1.setFamily(u"MS Shell Dlg 2")
+        font1.setPointSize(28)
+        self.pb_1.setFont(font1)
+        self.pb_1.setMouseTracking(False)
+        self.pb_1.setAutoFillBackground(False)
+        self.pb_1.setStyleSheet(u"QPushButton {\n"
+                                "	color: rgb(20, 126, 255);\n"
+                                "	border-radius: 5px;\n"
+                                "    background-color: rgb(220, 232, 244);\n"
+                                "}\n"
+                                "\n"
+                                "QPushButton:hover {\n"
+                                "    background-color: rgb(213, 224, 236);\n"
+                                "}\n"
+                                "\n"
+                                "QPushButton:pressed {\n"
+                                "    background-color: rgb(205, 215, 226);\n"
+                                "}\n"
+                                "")
+        self.pb_1.setCheckable(False)
+        self.pb_1.setAutoDefault(True)
+        self.pb_1.setFlat(False)
+        self.pb_2 = QPushButton(SudokuSolver)
+        self.pb_2.setObjectName(u"pb_2")
+        self.pb_2.setGeometry(QRect(690, 180, 100, 100))
+        palette1 = QPalette()
+        palette1.setBrush(QPalette.Active, QPalette.WindowText, brush)
+        palette1.setBrush(QPalette.Active, QPalette.Button, brush1)
+        palette1.setBrush(QPalette.Active, QPalette.Light, brush2)
+        palette1.setBrush(QPalette.Active, QPalette.Midlight, brush2)
+        palette1.setBrush(QPalette.Active, QPalette.Dark, brush3)
+        palette1.setBrush(QPalette.Active, QPalette.Mid, brush4)
+        palette1.setBrush(QPalette.Active, QPalette.Text, brush)
+        palette1.setBrush(QPalette.Active, QPalette.BrightText, brush2)
+        palette1.setBrush(QPalette.Active, QPalette.ButtonText, brush)
+        palette1.setBrush(QPalette.Active, QPalette.Base, brush1)
+        palette1.setBrush(QPalette.Active, QPalette.Window, brush1)
+        palette1.setBrush(QPalette.Active, QPalette.Shadow, brush5)
+        palette1.setBrush(QPalette.Active, QPalette.AlternateBase, brush2)
+        palette1.setBrush(QPalette.Active, QPalette.ToolTipBase, brush6)
+        palette1.setBrush(QPalette.Active, QPalette.ToolTipText, brush5)
+        # if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
+        palette1.setBrush(QPalette.Active, QPalette.PlaceholderText, brush7)
+        # endif
+        palette1.setBrush(QPalette.Inactive, QPalette.WindowText, brush)
+        palette1.setBrush(QPalette.Inactive, QPalette.Button, brush1)
+        palette1.setBrush(QPalette.Inactive, QPalette.Light, brush2)
+        palette1.setBrush(QPalette.Inactive, QPalette.Midlight, brush2)
+        palette1.setBrush(QPalette.Inactive, QPalette.Dark, brush3)
+        palette1.setBrush(QPalette.Inactive, QPalette.Mid, brush4)
+        palette1.setBrush(QPalette.Inactive, QPalette.Text, brush)
+        palette1.setBrush(QPalette.Inactive, QPalette.BrightText, brush2)
+        palette1.setBrush(QPalette.Inactive, QPalette.ButtonText, brush)
+        palette1.setBrush(QPalette.Inactive, QPalette.Base, brush1)
+        palette1.setBrush(QPalette.Inactive, QPalette.Window, brush1)
+        palette1.setBrush(QPalette.Inactive, QPalette.Shadow, brush5)
+        palette1.setBrush(QPalette.Inactive, QPalette.AlternateBase, brush2)
+        palette1.setBrush(QPalette.Inactive, QPalette.ToolTipBase, brush6)
+        palette1.setBrush(QPalette.Inactive, QPalette.ToolTipText, brush5)
+        # if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
+        palette1.setBrush(QPalette.Inactive, QPalette.PlaceholderText, brush7)
+        # endif
+        palette1.setBrush(QPalette.Disabled, QPalette.WindowText, brush)
+        palette1.setBrush(QPalette.Disabled, QPalette.Button, brush1)
+        palette1.setBrush(QPalette.Disabled, QPalette.Light, brush2)
+        palette1.setBrush(QPalette.Disabled, QPalette.Midlight, brush2)
+        palette1.setBrush(QPalette.Disabled, QPalette.Dark, brush3)
+        palette1.setBrush(QPalette.Disabled, QPalette.Mid, brush4)
+        palette1.setBrush(QPalette.Disabled, QPalette.Text, brush)
+        palette1.setBrush(QPalette.Disabled, QPalette.BrightText, brush2)
+        palette1.setBrush(QPalette.Disabled, QPalette.ButtonText, brush)
+        palette1.setBrush(QPalette.Disabled, QPalette.Base, brush1)
+        palette1.setBrush(QPalette.Disabled, QPalette.Window, brush1)
+        palette1.setBrush(QPalette.Disabled, QPalette.Shadow, brush5)
+        palette1.setBrush(QPalette.Disabled, QPalette.AlternateBase, brush2)
+        palette1.setBrush(QPalette.Disabled, QPalette.ToolTipBase, brush6)
+        palette1.setBrush(QPalette.Disabled, QPalette.ToolTipText, brush5)
+        # if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
+        palette1.setBrush(QPalette.Disabled, QPalette.PlaceholderText, brush7)
+        # endif
+        self.pb_2.setPalette(palette1)
+        self.pb_2.setFont(font1)
+        self.pb_2.setMouseTracking(False)
+        self.pb_2.setAutoFillBackground(False)
+        self.pb_2.setStyleSheet(u"QPushButton {\n"
+                                "	color: rgb(20, 126, 255);\n"
+                                "	border-radius: 5px;\n"
+                                "    background-color: rgb(220, 232, 244);\n"
+                                "}\n"
+                                "\n"
+                                "QPushButton:hover {\n"
+                                "    background-color: rgb(213, 224, 236);\n"
+                                "}\n"
+                                "\n"
+                                "QPushButton:pressed {\n"
+                                "    background-color: rgb(205, 215, 226);\n"
+                                "}\n"
+                                "")
+        self.pb_2.setCheckable(False)
+        self.pb_2.setAutoDefault(True)
+        self.pb_2.setFlat(False)
+        self.pb_3 = QPushButton(SudokuSolver)
+        self.pb_3.setObjectName(u"pb_3")
+        self.pb_3.setGeometry(QRect(800, 180, 100, 100))
+        palette2 = QPalette()
+        palette2.setBrush(QPalette.Active, QPalette.WindowText, brush)
+        palette2.setBrush(QPalette.Active, QPalette.Button, brush1)
+        palette2.setBrush(QPalette.Active, QPalette.Light, brush2)
+        palette2.setBrush(QPalette.Active, QPalette.Midlight, brush2)
+        palette2.setBrush(QPalette.Active, QPalette.Dark, brush3)
+        palette2.setBrush(QPalette.Active, QPalette.Mid, brush4)
+        palette2.setBrush(QPalette.Active, QPalette.Text, brush)
+        palette2.setBrush(QPalette.Active, QPalette.BrightText, brush2)
+        palette2.setBrush(QPalette.Active, QPalette.ButtonText, brush)
+        palette2.setBrush(QPalette.Active, QPalette.Base, brush1)
+        palette2.setBrush(QPalette.Active, QPalette.Window, brush1)
+        palette2.setBrush(QPalette.Active, QPalette.Shadow, brush5)
+        palette2.setBrush(QPalette.Active, QPalette.AlternateBase, brush2)
+        palette2.setBrush(QPalette.Active, QPalette.ToolTipBase, brush6)
+        palette2.setBrush(QPalette.Active, QPalette.ToolTipText, brush5)
+        # if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
+        palette2.setBrush(QPalette.Active, QPalette.PlaceholderText, brush7)
+        # endif
+        palette2.setBrush(QPalette.Inactive, QPalette.WindowText, brush)
+        palette2.setBrush(QPalette.Inactive, QPalette.Button, brush1)
+        palette2.setBrush(QPalette.Inactive, QPalette.Light, brush2)
+        palette2.setBrush(QPalette.Inactive, QPalette.Midlight, brush2)
+        palette2.setBrush(QPalette.Inactive, QPalette.Dark, brush3)
+        palette2.setBrush(QPalette.Inactive, QPalette.Mid, brush4)
+        palette2.setBrush(QPalette.Inactive, QPalette.Text, brush)
+        palette2.setBrush(QPalette.Inactive, QPalette.BrightText, brush2)
+        palette2.setBrush(QPalette.Inactive, QPalette.ButtonText, brush)
+        palette2.setBrush(QPalette.Inactive, QPalette.Base, brush1)
+        palette2.setBrush(QPalette.Inactive, QPalette.Window, brush1)
+        palette2.setBrush(QPalette.Inactive, QPalette.Shadow, brush5)
+        palette2.setBrush(QPalette.Inactive, QPalette.AlternateBase, brush2)
+        palette2.setBrush(QPalette.Inactive, QPalette.ToolTipBase, brush6)
+        palette2.setBrush(QPalette.Inactive, QPalette.ToolTipText, brush5)
+        # if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
+        palette2.setBrush(QPalette.Inactive, QPalette.PlaceholderText, brush7)
+        # endif
+        palette2.setBrush(QPalette.Disabled, QPalette.WindowText, brush)
+        palette2.setBrush(QPalette.Disabled, QPalette.Button, brush1)
+        palette2.setBrush(QPalette.Disabled, QPalette.Light, brush2)
+        palette2.setBrush(QPalette.Disabled, QPalette.Midlight, brush2)
+        palette2.setBrush(QPalette.Disabled, QPalette.Dark, brush3)
+        palette2.setBrush(QPalette.Disabled, QPalette.Mid, brush4)
+        palette2.setBrush(QPalette.Disabled, QPalette.Text, brush)
+        palette2.setBrush(QPalette.Disabled, QPalette.BrightText, brush2)
+        palette2.setBrush(QPalette.Disabled, QPalette.ButtonText, brush)
+        palette2.setBrush(QPalette.Disabled, QPalette.Base, brush1)
+        palette2.setBrush(QPalette.Disabled, QPalette.Window, brush1)
+        palette2.setBrush(QPalette.Disabled, QPalette.Shadow, brush5)
+        palette2.setBrush(QPalette.Disabled, QPalette.AlternateBase, brush2)
+        palette2.setBrush(QPalette.Disabled, QPalette.ToolTipBase, brush6)
+        palette2.setBrush(QPalette.Disabled, QPalette.ToolTipText, brush5)
+        # if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
+        palette2.setBrush(QPalette.Disabled, QPalette.PlaceholderText, brush7)
+        # endif
+        self.pb_3.setPalette(palette2)
+        self.pb_3.setFont(font1)
+        self.pb_3.setMouseTracking(False)
+        self.pb_3.setAutoFillBackground(False)
+        self.pb_3.setStyleSheet(u"QPushButton {\n"
+                                "	color: rgb(20, 126, 255);\n"
+                                "	border-radius: 5px;\n"
+                                "    background-color: rgb(220, 232, 244);\n"
+                                "}\n"
+                                "\n"
+                                "QPushButton:hover {\n"
+                                "    background-color: rgb(213, 224, 236);\n"
+                                "}\n"
+                                "\n"
+                                "QPushButton:pressed {\n"
+                                "    background-color: rgb(205, 215, 226);\n"
+                                "}\n"
+                                "")
+        self.pb_3.setCheckable(False)
+        self.pb_3.setAutoDefault(True)
+        self.pb_3.setFlat(False)
+        self.pb_4 = QPushButton(SudokuSolver)
+        self.pb_4.setObjectName(u"pb_4")
+        self.pb_4.setGeometry(QRect(580, 290, 100, 100))
+        palette3 = QPalette()
+        palette3.setBrush(QPalette.Active, QPalette.WindowText, brush)
+        palette3.setBrush(QPalette.Active, QPalette.Button, brush1)
+        palette3.setBrush(QPalette.Active, QPalette.Light, brush2)
+        palette3.setBrush(QPalette.Active, QPalette.Midlight, brush2)
+        palette3.setBrush(QPalette.Active, QPalette.Dark, brush3)
+        palette3.setBrush(QPalette.Active, QPalette.Mid, brush4)
+        palette3.setBrush(QPalette.Active, QPalette.Text, brush)
+        palette3.setBrush(QPalette.Active, QPalette.BrightText, brush2)
+        palette3.setBrush(QPalette.Active, QPalette.ButtonText, brush)
+        palette3.setBrush(QPalette.Active, QPalette.Base, brush1)
+        palette3.setBrush(QPalette.Active, QPalette.Window, brush1)
+        palette3.setBrush(QPalette.Active, QPalette.Shadow, brush5)
+        palette3.setBrush(QPalette.Active, QPalette.AlternateBase, brush2)
+        palette3.setBrush(QPalette.Active, QPalette.ToolTipBase, brush6)
+        palette3.setBrush(QPalette.Active, QPalette.ToolTipText, brush5)
+        # if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
+        palette3.setBrush(QPalette.Active, QPalette.PlaceholderText, brush7)
+        # endif
+        palette3.setBrush(QPalette.Inactive, QPalette.WindowText, brush)
+        palette3.setBrush(QPalette.Inactive, QPalette.Button, brush1)
+        palette3.setBrush(QPalette.Inactive, QPalette.Light, brush2)
+        palette3.setBrush(QPalette.Inactive, QPalette.Midlight, brush2)
+        palette3.setBrush(QPalette.Inactive, QPalette.Dark, brush3)
+        palette3.setBrush(QPalette.Inactive, QPalette.Mid, brush4)
+        palette3.setBrush(QPalette.Inactive, QPalette.Text, brush)
+        palette3.setBrush(QPalette.Inactive, QPalette.BrightText, brush2)
+        palette3.setBrush(QPalette.Inactive, QPalette.ButtonText, brush)
+        palette3.setBrush(QPalette.Inactive, QPalette.Base, brush1)
+        palette3.setBrush(QPalette.Inactive, QPalette.Window, brush1)
+        palette3.setBrush(QPalette.Inactive, QPalette.Shadow, brush5)
+        palette3.setBrush(QPalette.Inactive, QPalette.AlternateBase, brush2)
+        palette3.setBrush(QPalette.Inactive, QPalette.ToolTipBase, brush6)
+        palette3.setBrush(QPalette.Inactive, QPalette.ToolTipText, brush5)
+        # if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
+        palette3.setBrush(QPalette.Inactive, QPalette.PlaceholderText, brush7)
+        # endif
+        palette3.setBrush(QPalette.Disabled, QPalette.WindowText, brush)
+        palette3.setBrush(QPalette.Disabled, QPalette.Button, brush1)
+        palette3.setBrush(QPalette.Disabled, QPalette.Light, brush2)
+        palette3.setBrush(QPalette.Disabled, QPalette.Midlight, brush2)
+        palette3.setBrush(QPalette.Disabled, QPalette.Dark, brush3)
+        palette3.setBrush(QPalette.Disabled, QPalette.Mid, brush4)
+        palette3.setBrush(QPalette.Disabled, QPalette.Text, brush)
+        palette3.setBrush(QPalette.Disabled, QPalette.BrightText, brush2)
+        palette3.setBrush(QPalette.Disabled, QPalette.ButtonText, brush)
+        palette3.setBrush(QPalette.Disabled, QPalette.Base, brush1)
+        palette3.setBrush(QPalette.Disabled, QPalette.Window, brush1)
+        palette3.setBrush(QPalette.Disabled, QPalette.Shadow, brush5)
+        palette3.setBrush(QPalette.Disabled, QPalette.AlternateBase, brush2)
+        palette3.setBrush(QPalette.Disabled, QPalette.ToolTipBase, brush6)
+        palette3.setBrush(QPalette.Disabled, QPalette.ToolTipText, brush5)
+        # if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
+        palette3.setBrush(QPalette.Disabled, QPalette.PlaceholderText, brush7)
+        # endif
+        self.pb_4.setPalette(palette3)
+        self.pb_4.setFont(font1)
+        self.pb_4.setMouseTracking(False)
+        self.pb_4.setAutoFillBackground(False)
+        self.pb_4.setStyleSheet(u"QPushButton {\n"
+                                "	color: rgb(20, 126, 255);\n"
+                                "	border-radius: 5px;\n"
+                                "    background-color: rgb(220, 232, 244);\n"
+                                "}\n"
+                                "\n"
+                                "QPushButton:hover {\n"
+                                "    background-color: rgb(213, 224, 236);\n"
+                                "}\n"
+                                "\n"
+                                "QPushButton:pressed {\n"
+                                "    background-color: rgb(205, 215, 226);\n"
+                                "}\n"
+                                "")
+        self.pb_4.setCheckable(False)
+        self.pb_4.setAutoDefault(True)
+        self.pb_4.setFlat(False)
+        self.pb_5 = QPushButton(SudokuSolver)
+        self.pb_5.setObjectName(u"pb_5")
+        self.pb_5.setGeometry(QRect(690, 290, 100, 100))
+        palette4 = QPalette()
+        palette4.setBrush(QPalette.Active, QPalette.WindowText, brush)
+        palette4.setBrush(QPalette.Active, QPalette.Button, brush1)
+        palette4.setBrush(QPalette.Active, QPalette.Light, brush2)
+        palette4.setBrush(QPalette.Active, QPalette.Midlight, brush2)
+        palette4.setBrush(QPalette.Active, QPalette.Dark, brush3)
+        palette4.setBrush(QPalette.Active, QPalette.Mid, brush4)
+        palette4.setBrush(QPalette.Active, QPalette.Text, brush)
+        palette4.setBrush(QPalette.Active, QPalette.BrightText, brush2)
+        palette4.setBrush(QPalette.Active, QPalette.ButtonText, brush)
+        palette4.setBrush(QPalette.Active, QPalette.Base, brush1)
+        palette4.setBrush(QPalette.Active, QPalette.Window, brush1)
+        palette4.setBrush(QPalette.Active, QPalette.Shadow, brush5)
+        palette4.setBrush(QPalette.Active, QPalette.AlternateBase, brush2)
+        palette4.setBrush(QPalette.Active, QPalette.ToolTipBase, brush6)
+        palette4.setBrush(QPalette.Active, QPalette.ToolTipText, brush5)
+        # if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
+        palette4.setBrush(QPalette.Active, QPalette.PlaceholderText, brush7)
+        # endif
+        palette4.setBrush(QPalette.Inactive, QPalette.WindowText, brush)
+        palette4.setBrush(QPalette.Inactive, QPalette.Button, brush1)
+        palette4.setBrush(QPalette.Inactive, QPalette.Light, brush2)
+        palette4.setBrush(QPalette.Inactive, QPalette.Midlight, brush2)
+        palette4.setBrush(QPalette.Inactive, QPalette.Dark, brush3)
+        palette4.setBrush(QPalette.Inactive, QPalette.Mid, brush4)
+        palette4.setBrush(QPalette.Inactive, QPalette.Text, brush)
+        palette4.setBrush(QPalette.Inactive, QPalette.BrightText, brush2)
+        palette4.setBrush(QPalette.Inactive, QPalette.ButtonText, brush)
+        palette4.setBrush(QPalette.Inactive, QPalette.Base, brush1)
+        palette4.setBrush(QPalette.Inactive, QPalette.Window, brush1)
+        palette4.setBrush(QPalette.Inactive, QPalette.Shadow, brush5)
+        palette4.setBrush(QPalette.Inactive, QPalette.AlternateBase, brush2)
+        palette4.setBrush(QPalette.Inactive, QPalette.ToolTipBase, brush6)
+        palette4.setBrush(QPalette.Inactive, QPalette.ToolTipText, brush5)
+        # if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
+        palette4.setBrush(QPalette.Inactive, QPalette.PlaceholderText, brush7)
+        # endif
+        palette4.setBrush(QPalette.Disabled, QPalette.WindowText, brush)
+        palette4.setBrush(QPalette.Disabled, QPalette.Button, brush1)
+        palette4.setBrush(QPalette.Disabled, QPalette.Light, brush2)
+        palette4.setBrush(QPalette.Disabled, QPalette.Midlight, brush2)
+        palette4.setBrush(QPalette.Disabled, QPalette.Dark, brush3)
+        palette4.setBrush(QPalette.Disabled, QPalette.Mid, brush4)
+        palette4.setBrush(QPalette.Disabled, QPalette.Text, brush)
+        palette4.setBrush(QPalette.Disabled, QPalette.BrightText, brush2)
+        palette4.setBrush(QPalette.Disabled, QPalette.ButtonText, brush)
+        palette4.setBrush(QPalette.Disabled, QPalette.Base, brush1)
+        palette4.setBrush(QPalette.Disabled, QPalette.Window, brush1)
+        palette4.setBrush(QPalette.Disabled, QPalette.Shadow, brush5)
+        palette4.setBrush(QPalette.Disabled, QPalette.AlternateBase, brush2)
+        palette4.setBrush(QPalette.Disabled, QPalette.ToolTipBase, brush6)
+        palette4.setBrush(QPalette.Disabled, QPalette.ToolTipText, brush5)
+        # if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
+        palette4.setBrush(QPalette.Disabled, QPalette.PlaceholderText, brush7)
+        # endif
+        self.pb_5.setPalette(palette4)
+        self.pb_5.setFont(font1)
+        self.pb_5.setMouseTracking(False)
+        self.pb_5.setAutoFillBackground(False)
+        self.pb_5.setStyleSheet(u"QPushButton {\n"
+                                "	color: rgb(20, 126, 255);\n"
+                                "	border-radius: 5px;\n"
+                                "    background-color: rgb(220, 232, 244);\n"
+                                "}\n"
+                                "\n"
+                                "QPushButton:hover {\n"
+                                "    background-color: rgb(213, 224, 236);\n"
+                                "}\n"
+                                "\n"
+                                "QPushButton:pressed {\n"
+                                "    background-color: rgb(205, 215, 226);\n"
+                                "}\n"
+                                "")
+        self.pb_5.setCheckable(False)
+        self.pb_5.setAutoDefault(True)
+        self.pb_5.setFlat(False)
+        self.pb_6 = QPushButton(SudokuSolver)
+        self.pb_6.setObjectName(u"pb_6")
+        self.pb_6.setGeometry(QRect(800, 290, 100, 100))
+        palette5 = QPalette()
+        palette5.setBrush(QPalette.Active, QPalette.WindowText, brush)
+        palette5.setBrush(QPalette.Active, QPalette.Button, brush1)
+        palette5.setBrush(QPalette.Active, QPalette.Light, brush2)
+        palette5.setBrush(QPalette.Active, QPalette.Midlight, brush2)
+        palette5.setBrush(QPalette.Active, QPalette.Dark, brush3)
+        palette5.setBrush(QPalette.Active, QPalette.Mid, brush4)
+        palette5.setBrush(QPalette.Active, QPalette.Text, brush)
+        palette5.setBrush(QPalette.Active, QPalette.BrightText, brush2)
+        palette5.setBrush(QPalette.Active, QPalette.ButtonText, brush)
+        palette5.setBrush(QPalette.Active, QPalette.Base, brush1)
+        palette5.setBrush(QPalette.Active, QPalette.Window, brush1)
+        palette5.setBrush(QPalette.Active, QPalette.Shadow, brush5)
+        palette5.setBrush(QPalette.Active, QPalette.AlternateBase, brush2)
+        palette5.setBrush(QPalette.Active, QPalette.ToolTipBase, brush6)
+        palette5.setBrush(QPalette.Active, QPalette.ToolTipText, brush5)
+        # if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
+        palette5.setBrush(QPalette.Active, QPalette.PlaceholderText, brush7)
+        # endif
+        palette5.setBrush(QPalette.Inactive, QPalette.WindowText, brush)
+        palette5.setBrush(QPalette.Inactive, QPalette.Button, brush1)
+        palette5.setBrush(QPalette.Inactive, QPalette.Light, brush2)
+        palette5.setBrush(QPalette.Inactive, QPalette.Midlight, brush2)
+        palette5.setBrush(QPalette.Inactive, QPalette.Dark, brush3)
+        palette5.setBrush(QPalette.Inactive, QPalette.Mid, brush4)
+        palette5.setBrush(QPalette.Inactive, QPalette.Text, brush)
+        palette5.setBrush(QPalette.Inactive, QPalette.BrightText, brush2)
+        palette5.setBrush(QPalette.Inactive, QPalette.ButtonText, brush)
+        palette5.setBrush(QPalette.Inactive, QPalette.Base, brush1)
+        palette5.setBrush(QPalette.Inactive, QPalette.Window, brush1)
+        palette5.setBrush(QPalette.Inactive, QPalette.Shadow, brush5)
+        palette5.setBrush(QPalette.Inactive, QPalette.AlternateBase, brush2)
+        palette5.setBrush(QPalette.Inactive, QPalette.ToolTipBase, brush6)
+        palette5.setBrush(QPalette.Inactive, QPalette.ToolTipText, brush5)
+        # if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
+        palette5.setBrush(QPalette.Inactive, QPalette.PlaceholderText, brush7)
+        # endif
+        palette5.setBrush(QPalette.Disabled, QPalette.WindowText, brush)
+        palette5.setBrush(QPalette.Disabled, QPalette.Button, brush1)
+        palette5.setBrush(QPalette.Disabled, QPalette.Light, brush2)
+        palette5.setBrush(QPalette.Disabled, QPalette.Midlight, brush2)
+        palette5.setBrush(QPalette.Disabled, QPalette.Dark, brush3)
+        palette5.setBrush(QPalette.Disabled, QPalette.Mid, brush4)
+        palette5.setBrush(QPalette.Disabled, QPalette.Text, brush)
+        palette5.setBrush(QPalette.Disabled, QPalette.BrightText, brush2)
+        palette5.setBrush(QPalette.Disabled, QPalette.ButtonText, brush)
+        palette5.setBrush(QPalette.Disabled, QPalette.Base, brush1)
+        palette5.setBrush(QPalette.Disabled, QPalette.Window, brush1)
+        palette5.setBrush(QPalette.Disabled, QPalette.Shadow, brush5)
+        palette5.setBrush(QPalette.Disabled, QPalette.AlternateBase, brush2)
+        palette5.setBrush(QPalette.Disabled, QPalette.ToolTipBase, brush6)
+        palette5.setBrush(QPalette.Disabled, QPalette.ToolTipText, brush5)
+        # if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
+        palette5.setBrush(QPalette.Disabled, QPalette.PlaceholderText, brush7)
+        # endif
+        self.pb_6.setPalette(palette5)
+        self.pb_6.setFont(font1)
+        self.pb_6.setMouseTracking(False)
+        self.pb_6.setAutoFillBackground(False)
+        self.pb_6.setStyleSheet(u"QPushButton {\n"
+                                "	color: rgb(20, 126, 255);\n"
+                                "	border-radius: 5px;\n"
+                                "    background-color: rgb(220, 232, 244);\n"
+                                "}\n"
+                                "\n"
+                                "QPushButton:hover {\n"
+                                "    background-color: rgb(213, 224, 236);\n"
+                                "}\n"
+                                "\n"
+                                "QPushButton:pressed {\n"
+                                "    background-color: rgb(205, 215, 226);\n"
+                                "}\n"
+                                "")
+        self.pb_6.setCheckable(False)
+        self.pb_6.setAutoDefault(True)
+        self.pb_6.setFlat(False)
+        self.pb_7 = QPushButton(SudokuSolver)
+        self.pb_7.setObjectName(u"pb_7")
+        self.pb_7.setGeometry(QRect(580, 400, 100, 100))
+        palette6 = QPalette()
+        palette6.setBrush(QPalette.Active, QPalette.WindowText, brush)
+        palette6.setBrush(QPalette.Active, QPalette.Button, brush1)
+        palette6.setBrush(QPalette.Active, QPalette.Light, brush2)
+        palette6.setBrush(QPalette.Active, QPalette.Midlight, brush2)
+        palette6.setBrush(QPalette.Active, QPalette.Dark, brush3)
+        palette6.setBrush(QPalette.Active, QPalette.Mid, brush4)
+        palette6.setBrush(QPalette.Active, QPalette.Text, brush)
+        palette6.setBrush(QPalette.Active, QPalette.BrightText, brush2)
+        palette6.setBrush(QPalette.Active, QPalette.ButtonText, brush)
+        palette6.setBrush(QPalette.Active, QPalette.Base, brush1)
+        palette6.setBrush(QPalette.Active, QPalette.Window, brush1)
+        palette6.setBrush(QPalette.Active, QPalette.Shadow, brush5)
+        palette6.setBrush(QPalette.Active, QPalette.AlternateBase, brush2)
+        palette6.setBrush(QPalette.Active, QPalette.ToolTipBase, brush6)
+        palette6.setBrush(QPalette.Active, QPalette.ToolTipText, brush5)
+        # if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
+        palette6.setBrush(QPalette.Active, QPalette.PlaceholderText, brush7)
+        # endif
+        palette6.setBrush(QPalette.Inactive, QPalette.WindowText, brush)
+        palette6.setBrush(QPalette.Inactive, QPalette.Button, brush1)
+        palette6.setBrush(QPalette.Inactive, QPalette.Light, brush2)
+        palette6.setBrush(QPalette.Inactive, QPalette.Midlight, brush2)
+        palette6.setBrush(QPalette.Inactive, QPalette.Dark, brush3)
+        palette6.setBrush(QPalette.Inactive, QPalette.Mid, brush4)
+        palette6.setBrush(QPalette.Inactive, QPalette.Text, brush)
+        palette6.setBrush(QPalette.Inactive, QPalette.BrightText, brush2)
+        palette6.setBrush(QPalette.Inactive, QPalette.ButtonText, brush)
+        palette6.setBrush(QPalette.Inactive, QPalette.Base, brush1)
+        palette6.setBrush(QPalette.Inactive, QPalette.Window, brush1)
+        palette6.setBrush(QPalette.Inactive, QPalette.Shadow, brush5)
+        palette6.setBrush(QPalette.Inactive, QPalette.AlternateBase, brush2)
+        palette6.setBrush(QPalette.Inactive, QPalette.ToolTipBase, brush6)
+        palette6.setBrush(QPalette.Inactive, QPalette.ToolTipText, brush5)
+        # if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
+        palette6.setBrush(QPalette.Inactive, QPalette.PlaceholderText, brush7)
+        # endif
+        palette6.setBrush(QPalette.Disabled, QPalette.WindowText, brush)
+        palette6.setBrush(QPalette.Disabled, QPalette.Button, brush1)
+        palette6.setBrush(QPalette.Disabled, QPalette.Light, brush2)
+        palette6.setBrush(QPalette.Disabled, QPalette.Midlight, brush2)
+        palette6.setBrush(QPalette.Disabled, QPalette.Dark, brush3)
+        palette6.setBrush(QPalette.Disabled, QPalette.Mid, brush4)
+        palette6.setBrush(QPalette.Disabled, QPalette.Text, brush)
+        palette6.setBrush(QPalette.Disabled, QPalette.BrightText, brush2)
+        palette6.setBrush(QPalette.Disabled, QPalette.ButtonText, brush)
+        palette6.setBrush(QPalette.Disabled, QPalette.Base, brush1)
+        palette6.setBrush(QPalette.Disabled, QPalette.Window, brush1)
+        palette6.setBrush(QPalette.Disabled, QPalette.Shadow, brush5)
+        palette6.setBrush(QPalette.Disabled, QPalette.AlternateBase, brush2)
+        palette6.setBrush(QPalette.Disabled, QPalette.ToolTipBase, brush6)
+        palette6.setBrush(QPalette.Disabled, QPalette.ToolTipText, brush5)
+        # if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
+        palette6.setBrush(QPalette.Disabled, QPalette.PlaceholderText, brush7)
+        # endif
+        self.pb_7.setPalette(palette6)
+        self.pb_7.setFont(font1)
+        self.pb_7.setMouseTracking(False)
+        self.pb_7.setAutoFillBackground(False)
+        self.pb_7.setStyleSheet(u"QPushButton {\n"
+                                "	color: rgb(20, 126, 255);\n"
+                                "	border-radius: 5px;\n"
+                                "    background-color: rgb(220, 232, 244);\n"
+                                "}\n"
+                                "\n"
+                                "QPushButton:hover {\n"
+                                "    background-color: rgb(213, 224, 236);\n"
+                                "}\n"
+                                "\n"
+                                "QPushButton:pressed {\n"
+                                "    background-color: rgb(205, 215, 226);\n"
+                                "}\n"
+                                "")
+        self.pb_7.setCheckable(False)
+        self.pb_7.setAutoDefault(True)
+        self.pb_7.setFlat(False)
+        self.pb_8 = QPushButton(SudokuSolver)
+        self.pb_8.setObjectName(u"pb_8")
+        self.pb_8.setGeometry(QRect(690, 400, 100, 100))
+        palette7 = QPalette()
+        palette7.setBrush(QPalette.Active, QPalette.WindowText, brush)
+        palette7.setBrush(QPalette.Active, QPalette.Button, brush1)
+        palette7.setBrush(QPalette.Active, QPalette.Light, brush2)
+        palette7.setBrush(QPalette.Active, QPalette.Midlight, brush2)
+        palette7.setBrush(QPalette.Active, QPalette.Dark, brush3)
+        palette7.setBrush(QPalette.Active, QPalette.Mid, brush4)
+        palette7.setBrush(QPalette.Active, QPalette.Text, brush)
+        palette7.setBrush(QPalette.Active, QPalette.BrightText, brush2)
+        palette7.setBrush(QPalette.Active, QPalette.ButtonText, brush)
+        palette7.setBrush(QPalette.Active, QPalette.Base, brush1)
+        palette7.setBrush(QPalette.Active, QPalette.Window, brush1)
+        palette7.setBrush(QPalette.Active, QPalette.Shadow, brush5)
+        palette7.setBrush(QPalette.Active, QPalette.AlternateBase, brush2)
+        palette7.setBrush(QPalette.Active, QPalette.ToolTipBase, brush6)
+        palette7.setBrush(QPalette.Active, QPalette.ToolTipText, brush5)
+        # if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
+        palette7.setBrush(QPalette.Active, QPalette.PlaceholderText, brush7)
+        # endif
+        palette7.setBrush(QPalette.Inactive, QPalette.WindowText, brush)
+        palette7.setBrush(QPalette.Inactive, QPalette.Button, brush1)
+        palette7.setBrush(QPalette.Inactive, QPalette.Light, brush2)
+        palette7.setBrush(QPalette.Inactive, QPalette.Midlight, brush2)
+        palette7.setBrush(QPalette.Inactive, QPalette.Dark, brush3)
+        palette7.setBrush(QPalette.Inactive, QPalette.Mid, brush4)
+        palette7.setBrush(QPalette.Inactive, QPalette.Text, brush)
+        palette7.setBrush(QPalette.Inactive, QPalette.BrightText, brush2)
+        palette7.setBrush(QPalette.Inactive, QPalette.ButtonText, brush)
+        palette7.setBrush(QPalette.Inactive, QPalette.Base, brush1)
+        palette7.setBrush(QPalette.Inactive, QPalette.Window, brush1)
+        palette7.setBrush(QPalette.Inactive, QPalette.Shadow, brush5)
+        palette7.setBrush(QPalette.Inactive, QPalette.AlternateBase, brush2)
+        palette7.setBrush(QPalette.Inactive, QPalette.ToolTipBase, brush6)
+        palette7.setBrush(QPalette.Inactive, QPalette.ToolTipText, brush5)
+        # if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
+        palette7.setBrush(QPalette.Inactive, QPalette.PlaceholderText, brush7)
+        # endif
+        palette7.setBrush(QPalette.Disabled, QPalette.WindowText, brush)
+        palette7.setBrush(QPalette.Disabled, QPalette.Button, brush1)
+        palette7.setBrush(QPalette.Disabled, QPalette.Light, brush2)
+        palette7.setBrush(QPalette.Disabled, QPalette.Midlight, brush2)
+        palette7.setBrush(QPalette.Disabled, QPalette.Dark, brush3)
+        palette7.setBrush(QPalette.Disabled, QPalette.Mid, brush4)
+        palette7.setBrush(QPalette.Disabled, QPalette.Text, brush)
+        palette7.setBrush(QPalette.Disabled, QPalette.BrightText, brush2)
+        palette7.setBrush(QPalette.Disabled, QPalette.ButtonText, brush)
+        palette7.setBrush(QPalette.Disabled, QPalette.Base, brush1)
+        palette7.setBrush(QPalette.Disabled, QPalette.Window, brush1)
+        palette7.setBrush(QPalette.Disabled, QPalette.Shadow, brush5)
+        palette7.setBrush(QPalette.Disabled, QPalette.AlternateBase, brush2)
+        palette7.setBrush(QPalette.Disabled, QPalette.ToolTipBase, brush6)
+        palette7.setBrush(QPalette.Disabled, QPalette.ToolTipText, brush5)
+        # if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
+        palette7.setBrush(QPalette.Disabled, QPalette.PlaceholderText, brush7)
+        # endif
+        self.pb_8.setPalette(palette7)
+        self.pb_8.setFont(font1)
+        self.pb_8.setMouseTracking(False)
+        self.pb_8.setAutoFillBackground(False)
+        self.pb_8.setStyleSheet(u"QPushButton {\n"
+                                "	color: rgb(20, 126, 255);\n"
+                                "	border-radius: 5px;\n"
+                                "    background-color: rgb(220, 232, 244);\n"
+                                "}\n"
+                                "\n"
+                                "QPushButton:hover {\n"
+                                "    background-color: rgb(213, 224, 236);\n"
+                                "}\n"
+                                "\n"
+                                "QPushButton:pressed {\n"
+                                "    background-color: rgb(205, 215, 226);\n"
+                                "}\n"
+                                "")
+        self.pb_8.setCheckable(False)
+        self.pb_8.setAutoDefault(True)
+        self.pb_8.setFlat(False)
+        self.pb_9 = QPushButton(SudokuSolver)
+        self.pb_9.setObjectName(u"pb_9")
+        self.pb_9.setGeometry(QRect(800, 400, 100, 100))
+        palette8 = QPalette()
+        palette8.setBrush(QPalette.Active, QPalette.WindowText, brush)
+        palette8.setBrush(QPalette.Active, QPalette.Button, brush1)
+        palette8.setBrush(QPalette.Active, QPalette.Light, brush2)
+        palette8.setBrush(QPalette.Active, QPalette.Midlight, brush2)
+        palette8.setBrush(QPalette.Active, QPalette.Dark, brush3)
+        palette8.setBrush(QPalette.Active, QPalette.Mid, brush4)
+        palette8.setBrush(QPalette.Active, QPalette.Text, brush)
+        palette8.setBrush(QPalette.Active, QPalette.BrightText, brush2)
+        palette8.setBrush(QPalette.Active, QPalette.ButtonText, brush)
+        palette8.setBrush(QPalette.Active, QPalette.Base, brush1)
+        palette8.setBrush(QPalette.Active, QPalette.Window, brush1)
+        palette8.setBrush(QPalette.Active, QPalette.Shadow, brush5)
+        palette8.setBrush(QPalette.Active, QPalette.AlternateBase, brush2)
+        palette8.setBrush(QPalette.Active, QPalette.ToolTipBase, brush6)
+        palette8.setBrush(QPalette.Active, QPalette.ToolTipText, brush5)
+        # if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
+        palette8.setBrush(QPalette.Active, QPalette.PlaceholderText, brush7)
+        # endif
+        palette8.setBrush(QPalette.Inactive, QPalette.WindowText, brush)
+        palette8.setBrush(QPalette.Inactive, QPalette.Button, brush1)
+        palette8.setBrush(QPalette.Inactive, QPalette.Light, brush2)
+        palette8.setBrush(QPalette.Inactive, QPalette.Midlight, brush2)
+        palette8.setBrush(QPalette.Inactive, QPalette.Dark, brush3)
+        palette8.setBrush(QPalette.Inactive, QPalette.Mid, brush4)
+        palette8.setBrush(QPalette.Inactive, QPalette.Text, brush)
+        palette8.setBrush(QPalette.Inactive, QPalette.BrightText, brush2)
+        palette8.setBrush(QPalette.Inactive, QPalette.ButtonText, brush)
+        palette8.setBrush(QPalette.Inactive, QPalette.Base, brush1)
+        palette8.setBrush(QPalette.Inactive, QPalette.Window, brush1)
+        palette8.setBrush(QPalette.Inactive, QPalette.Shadow, brush5)
+        palette8.setBrush(QPalette.Inactive, QPalette.AlternateBase, brush2)
+        palette8.setBrush(QPalette.Inactive, QPalette.ToolTipBase, brush6)
+        palette8.setBrush(QPalette.Inactive, QPalette.ToolTipText, brush5)
+        # if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
+        palette8.setBrush(QPalette.Inactive, QPalette.PlaceholderText, brush7)
+        # endif
+        palette8.setBrush(QPalette.Disabled, QPalette.WindowText, brush)
+        palette8.setBrush(QPalette.Disabled, QPalette.Button, brush1)
+        palette8.setBrush(QPalette.Disabled, QPalette.Light, brush2)
+        palette8.setBrush(QPalette.Disabled, QPalette.Midlight, brush2)
+        palette8.setBrush(QPalette.Disabled, QPalette.Dark, brush3)
+        palette8.setBrush(QPalette.Disabled, QPalette.Mid, brush4)
+        palette8.setBrush(QPalette.Disabled, QPalette.Text, brush)
+        palette8.setBrush(QPalette.Disabled, QPalette.BrightText, brush2)
+        palette8.setBrush(QPalette.Disabled, QPalette.ButtonText, brush)
+        palette8.setBrush(QPalette.Disabled, QPalette.Base, brush1)
+        palette8.setBrush(QPalette.Disabled, QPalette.Window, brush1)
+        palette8.setBrush(QPalette.Disabled, QPalette.Shadow, brush5)
+        palette8.setBrush(QPalette.Disabled, QPalette.AlternateBase, brush2)
+        palette8.setBrush(QPalette.Disabled, QPalette.ToolTipBase, brush6)
+        palette8.setBrush(QPalette.Disabled, QPalette.ToolTipText, brush5)
+        # if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
+        palette8.setBrush(QPalette.Disabled, QPalette.PlaceholderText, brush7)
+        # endif
+        self.pb_9.setPalette(palette8)
+        self.pb_9.setFont(font1)
+        self.pb_9.setMouseTracking(False)
+        self.pb_9.setAutoFillBackground(False)
+        self.pb_9.setStyleSheet(u"QPushButton {\n"
+                                "	color: rgb(20, 126, 255);\n"
+                                "	border-radius: 5px;\n"
+                                "    background-color: rgb(220, 232, 244);\n"
+                                "}\n"
+                                "\n"
+                                "QPushButton:hover {\n"
+                                "    background-color: rgb(213, 224, 236);\n"
+                                "}\n"
+                                "\n"
+                                "QPushButton:pressed {\n"
+                                "    background-color: rgb(205, 215, 226);\n"
+                                "}\n"
+                                "")
+        self.pb_9.setCheckable(False)
+        self.pb_9.setAutoDefault(True)
+        self.pb_9.setFlat(False)
+        self.pb_solve = QPushButton(SudokuSolver)
+        self.pb_solve.setObjectName(u"pb_solve")
+        self.pb_solve.setGeometry(QRect(690, 40, 100, 100))
+        palette9 = QPalette()
+        palette9.setBrush(QPalette.Active, QPalette.WindowText, brush)
+        palette9.setBrush(QPalette.Active, QPalette.Button, brush1)
+        palette9.setBrush(QPalette.Active, QPalette.Light, brush2)
+        palette9.setBrush(QPalette.Active, QPalette.Midlight, brush2)
+        palette9.setBrush(QPalette.Active, QPalette.Dark, brush3)
+        palette9.setBrush(QPalette.Active, QPalette.Mid, brush4)
+        palette9.setBrush(QPalette.Active, QPalette.Text, brush)
+        palette9.setBrush(QPalette.Active, QPalette.BrightText, brush2)
+        palette9.setBrush(QPalette.Active, QPalette.ButtonText, brush)
+        palette9.setBrush(QPalette.Active, QPalette.Base, brush1)
+        palette9.setBrush(QPalette.Active, QPalette.Window, brush1)
+        palette9.setBrush(QPalette.Active, QPalette.Shadow, brush5)
+        palette9.setBrush(QPalette.Active, QPalette.AlternateBase, brush2)
+        palette9.setBrush(QPalette.Active, QPalette.ToolTipBase, brush6)
+        palette9.setBrush(QPalette.Active, QPalette.ToolTipText, brush5)
+        # if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
+        palette9.setBrush(QPalette.Active, QPalette.PlaceholderText, brush7)
+        # endif
+        palette9.setBrush(QPalette.Inactive, QPalette.WindowText, brush)
+        palette9.setBrush(QPalette.Inactive, QPalette.Button, brush1)
+        palette9.setBrush(QPalette.Inactive, QPalette.Light, brush2)
+        palette9.setBrush(QPalette.Inactive, QPalette.Midlight, brush2)
+        palette9.setBrush(QPalette.Inactive, QPalette.Dark, brush3)
+        palette9.setBrush(QPalette.Inactive, QPalette.Mid, brush4)
+        palette9.setBrush(QPalette.Inactive, QPalette.Text, brush)
+        palette9.setBrush(QPalette.Inactive, QPalette.BrightText, brush2)
+        palette9.setBrush(QPalette.Inactive, QPalette.ButtonText, brush)
+        palette9.setBrush(QPalette.Inactive, QPalette.Base, brush1)
+        palette9.setBrush(QPalette.Inactive, QPalette.Window, brush1)
+        palette9.setBrush(QPalette.Inactive, QPalette.Shadow, brush5)
+        palette9.setBrush(QPalette.Inactive, QPalette.AlternateBase, brush2)
+        palette9.setBrush(QPalette.Inactive, QPalette.ToolTipBase, brush6)
+        palette9.setBrush(QPalette.Inactive, QPalette.ToolTipText, brush5)
+        # if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
+        palette9.setBrush(QPalette.Inactive, QPalette.PlaceholderText, brush7)
+        # endif
+        palette9.setBrush(QPalette.Disabled, QPalette.WindowText, brush)
+        palette9.setBrush(QPalette.Disabled, QPalette.Button, brush1)
+        palette9.setBrush(QPalette.Disabled, QPalette.Light, brush2)
+        palette9.setBrush(QPalette.Disabled, QPalette.Midlight, brush2)
+        palette9.setBrush(QPalette.Disabled, QPalette.Dark, brush3)
+        palette9.setBrush(QPalette.Disabled, QPalette.Mid, brush4)
+        palette9.setBrush(QPalette.Disabled, QPalette.Text, brush)
+        palette9.setBrush(QPalette.Disabled, QPalette.BrightText, brush2)
+        palette9.setBrush(QPalette.Disabled, QPalette.ButtonText, brush)
+        palette9.setBrush(QPalette.Disabled, QPalette.Base, brush1)
+        palette9.setBrush(QPalette.Disabled, QPalette.Window, brush1)
+        palette9.setBrush(QPalette.Disabled, QPalette.Shadow, brush5)
+        palette9.setBrush(QPalette.Disabled, QPalette.AlternateBase, brush2)
+        palette9.setBrush(QPalette.Disabled, QPalette.ToolTipBase, brush6)
+        palette9.setBrush(QPalette.Disabled, QPalette.ToolTipText, brush5)
+        # if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
+        palette9.setBrush(QPalette.Disabled, QPalette.PlaceholderText, brush7)
+        # endif
+        self.pb_solve.setPalette(palette9)
+        font2 = QFont()
+        font2.setFamily(u"MS Shell Dlg 2")
+        font2.setPointSize(22)
+        self.pb_solve.setFont(font2)
+        self.pb_solve.setMouseTracking(False)
+        self.pb_solve.setAutoFillBackground(False)
+        self.pb_solve.setStyleSheet(u"QPushButton {\n"
+                                    "	color: rgb(20, 126, 255);\n"
+                                    "	border-radius: 5px;\n"
+                                    "    background-color: rgb(220, 232, 244);\n"
+                                    "}\n"
+                                    "\n"
+                                    "QPushButton:hover {\n"
+                                    "    background-color: rgb(213, 224, 236);\n"
+                                    "}\n"
+                                    "\n"
+                                    "QPushButton:pressed {\n"
+                                    "    background-color: rgb(205, 215, 226);\n"
+                                    "}\n"
+                                    "")
+        self.pb_solve.setCheckable(False)
+        self.pb_solve.setAutoDefault(True)
+        self.pb_solve.setFlat(False)
+        self.pb_new = QPushButton(SudokuSolver)
+        self.pb_new.setObjectName(u"pb_new")
+        self.pb_new.setGeometry(QRect(580, 40, 100, 100))
+        palette10 = QPalette()
+        palette10.setBrush(QPalette.Active, QPalette.WindowText, brush)
+        palette10.setBrush(QPalette.Active, QPalette.Button, brush1)
+        palette10.setBrush(QPalette.Active, QPalette.Light, brush2)
+        palette10.setBrush(QPalette.Active, QPalette.Midlight, brush2)
+        palette10.setBrush(QPalette.Active, QPalette.Dark, brush3)
+        palette10.setBrush(QPalette.Active, QPalette.Mid, brush4)
+        palette10.setBrush(QPalette.Active, QPalette.Text, brush)
+        palette10.setBrush(QPalette.Active, QPalette.BrightText, brush2)
+        palette10.setBrush(QPalette.Active, QPalette.ButtonText, brush)
+        palette10.setBrush(QPalette.Active, QPalette.Base, brush1)
+        palette10.setBrush(QPalette.Active, QPalette.Window, brush1)
+        palette10.setBrush(QPalette.Active, QPalette.Shadow, brush5)
+        palette10.setBrush(QPalette.Active, QPalette.AlternateBase, brush2)
+        palette10.setBrush(QPalette.Active, QPalette.ToolTipBase, brush6)
+        palette10.setBrush(QPalette.Active, QPalette.ToolTipText, brush5)
+        # if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
+        palette10.setBrush(QPalette.Active, QPalette.PlaceholderText, brush7)
+        # endif
+        palette10.setBrush(QPalette.Inactive, QPalette.WindowText, brush)
+        palette10.setBrush(QPalette.Inactive, QPalette.Button, brush1)
+        palette10.setBrush(QPalette.Inactive, QPalette.Light, brush2)
+        palette10.setBrush(QPalette.Inactive, QPalette.Midlight, brush2)
+        palette10.setBrush(QPalette.Inactive, QPalette.Dark, brush3)
+        palette10.setBrush(QPalette.Inactive, QPalette.Mid, brush4)
+        palette10.setBrush(QPalette.Inactive, QPalette.Text, brush)
+        palette10.setBrush(QPalette.Inactive, QPalette.BrightText, brush2)
+        palette10.setBrush(QPalette.Inactive, QPalette.ButtonText, brush)
+        palette10.setBrush(QPalette.Inactive, QPalette.Base, brush1)
+        palette10.setBrush(QPalette.Inactive, QPalette.Window, brush1)
+        palette10.setBrush(QPalette.Inactive, QPalette.Shadow, brush5)
+        palette10.setBrush(QPalette.Inactive, QPalette.AlternateBase, brush2)
+        palette10.setBrush(QPalette.Inactive, QPalette.ToolTipBase, brush6)
+        palette10.setBrush(QPalette.Inactive, QPalette.ToolTipText, brush5)
+        # if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
+        palette10.setBrush(QPalette.Inactive, QPalette.PlaceholderText, brush7)
+        # endif
+        palette10.setBrush(QPalette.Disabled, QPalette.WindowText, brush)
+        palette10.setBrush(QPalette.Disabled, QPalette.Button, brush1)
+        palette10.setBrush(QPalette.Disabled, QPalette.Light, brush2)
+        palette10.setBrush(QPalette.Disabled, QPalette.Midlight, brush2)
+        palette10.setBrush(QPalette.Disabled, QPalette.Dark, brush3)
+        palette10.setBrush(QPalette.Disabled, QPalette.Mid, brush4)
+        palette10.setBrush(QPalette.Disabled, QPalette.Text, brush)
+        palette10.setBrush(QPalette.Disabled, QPalette.BrightText, brush2)
+        palette10.setBrush(QPalette.Disabled, QPalette.ButtonText, brush)
+        palette10.setBrush(QPalette.Disabled, QPalette.Base, brush1)
+        palette10.setBrush(QPalette.Disabled, QPalette.Window, brush1)
+        palette10.setBrush(QPalette.Disabled, QPalette.Shadow, brush5)
+        palette10.setBrush(QPalette.Disabled, QPalette.AlternateBase, brush2)
+        palette10.setBrush(QPalette.Disabled, QPalette.ToolTipBase, brush6)
+        palette10.setBrush(QPalette.Disabled, QPalette.ToolTipText, brush5)
+        # if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
+        palette10.setBrush(QPalette.Disabled, QPalette.PlaceholderText, brush7)
+        # endif
+        self.pb_new.setPalette(palette10)
+        self.pb_new.setFont(font2)
+        self.pb_new.setMouseTracking(False)
+        self.pb_new.setAutoFillBackground(False)
+        self.pb_new.setStyleSheet(u"QPushButton {\n"
+                                  "	color: rgb(20, 126, 255);\n"
+                                  "	border-radius: 5px;\n"
+                                  "    background-color: rgb(220, 232, 244);\n"
+                                  "}\n"
+                                  "\n"
+                                  "QPushButton:hover {\n"
+                                  "    background-color: rgb(213, 224, 236);\n"
+                                  "}\n"
+                                  "\n"
+                                  "QPushButton:pressed {\n"
+                                  "    background-color: rgb(205, 215, 226);\n"
+                                  "}\n"
+                                  "")
+        self.pb_new.setCheckable(False)
+        self.pb_new.setAutoDefault(True)
+        self.pb_new.setFlat(False)
+        self.pb_import = QPushButton(SudokuSolver)
+        self.pb_import.setObjectName(u"pb_import")
+        self.pb_import.setGeometry(QRect(800, 40, 100, 100))
+        palette11 = QPalette()
+        palette11.setBrush(QPalette.Active, QPalette.WindowText, brush)
+        palette11.setBrush(QPalette.Active, QPalette.Button, brush1)
+        palette11.setBrush(QPalette.Active, QPalette.Light, brush2)
+        palette11.setBrush(QPalette.Active, QPalette.Midlight, brush2)
+        palette11.setBrush(QPalette.Active, QPalette.Dark, brush3)
+        palette11.setBrush(QPalette.Active, QPalette.Mid, brush4)
+        palette11.setBrush(QPalette.Active, QPalette.Text, brush)
+        palette11.setBrush(QPalette.Active, QPalette.BrightText, brush2)
+        palette11.setBrush(QPalette.Active, QPalette.ButtonText, brush)
+        palette11.setBrush(QPalette.Active, QPalette.Base, brush1)
+        palette11.setBrush(QPalette.Active, QPalette.Window, brush1)
+        palette11.setBrush(QPalette.Active, QPalette.Shadow, brush5)
+        palette11.setBrush(QPalette.Active, QPalette.AlternateBase, brush2)
+        palette11.setBrush(QPalette.Active, QPalette.ToolTipBase, brush6)
+        palette11.setBrush(QPalette.Active, QPalette.ToolTipText, brush5)
+        # if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
+        palette11.setBrush(QPalette.Active, QPalette.PlaceholderText, brush7)
+        # endif
+        palette11.setBrush(QPalette.Inactive, QPalette.WindowText, brush)
+        palette11.setBrush(QPalette.Inactive, QPalette.Button, brush1)
+        palette11.setBrush(QPalette.Inactive, QPalette.Light, brush2)
+        palette11.setBrush(QPalette.Inactive, QPalette.Midlight, brush2)
+        palette11.setBrush(QPalette.Inactive, QPalette.Dark, brush3)
+        palette11.setBrush(QPalette.Inactive, QPalette.Mid, brush4)
+        palette11.setBrush(QPalette.Inactive, QPalette.Text, brush)
+        palette11.setBrush(QPalette.Inactive, QPalette.BrightText, brush2)
+        palette11.setBrush(QPalette.Inactive, QPalette.ButtonText, brush)
+        palette11.setBrush(QPalette.Inactive, QPalette.Base, brush1)
+        palette11.setBrush(QPalette.Inactive, QPalette.Window, brush1)
+        palette11.setBrush(QPalette.Inactive, QPalette.Shadow, brush5)
+        palette11.setBrush(QPalette.Inactive, QPalette.AlternateBase, brush2)
+        palette11.setBrush(QPalette.Inactive, QPalette.ToolTipBase, brush6)
+        palette11.setBrush(QPalette.Inactive, QPalette.ToolTipText, brush5)
+        # if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
+        palette11.setBrush(QPalette.Inactive, QPalette.PlaceholderText, brush7)
+        # endif
+        palette11.setBrush(QPalette.Disabled, QPalette.WindowText, brush)
+        palette11.setBrush(QPalette.Disabled, QPalette.Button, brush1)
+        palette11.setBrush(QPalette.Disabled, QPalette.Light, brush2)
+        palette11.setBrush(QPalette.Disabled, QPalette.Midlight, brush2)
+        palette11.setBrush(QPalette.Disabled, QPalette.Dark, brush3)
+        palette11.setBrush(QPalette.Disabled, QPalette.Mid, brush4)
+        palette11.setBrush(QPalette.Disabled, QPalette.Text, brush)
+        palette11.setBrush(QPalette.Disabled, QPalette.BrightText, brush2)
+        palette11.setBrush(QPalette.Disabled, QPalette.ButtonText, brush)
+        palette11.setBrush(QPalette.Disabled, QPalette.Base, brush1)
+        palette11.setBrush(QPalette.Disabled, QPalette.Window, brush1)
+        palette11.setBrush(QPalette.Disabled, QPalette.Shadow, brush5)
+        palette11.setBrush(QPalette.Disabled, QPalette.AlternateBase, brush2)
+        palette11.setBrush(QPalette.Disabled, QPalette.ToolTipBase, brush6)
+        palette11.setBrush(QPalette.Disabled, QPalette.ToolTipText, brush5)
+        # if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
+        palette11.setBrush(QPalette.Disabled, QPalette.PlaceholderText, brush7)
+        # endif
+        self.pb_import.setPalette(palette11)
+        self.pb_import.setFont(font2)
+        self.pb_import.setMouseTracking(False)
+        self.pb_import.setAutoFillBackground(False)
+        self.pb_import.setStyleSheet(u"QPushButton {\n"
+                                     "	color: rgb(20, 126, 255);\n"
+                                     "	border-radius: 5px;\n"
+                                     "    background-color: rgb(220, 232, 244);\n"
+                                     "}\n"
+                                     "\n"
+                                     "QPushButton:hover {\n"
+                                     "    background-color: rgb(213, 224, 236);\n"
+                                     "}\n"
+                                     "\n"
+                                     "QPushButton:pressed {\n"
+                                     "    background-color: rgb(205, 215, 226);\n"
+                                     "}\n"
+                                     "")
+        self.pb_import.setCheckable(False)
+        self.pb_import.setAutoDefault(True)
+        self.pb_import.setFlat(False)
+        self.sl_difficultySlider = QSlider(SudokuSolver)
+        self.sl_difficultySlider.setObjectName(u"sl_difficultySlider")
+        self.sl_difficultySlider.setGeometry(QRect(600, 152, 121, 16))
+        self.sl_difficultySlider.setStyleSheet(u"QSlider::handle:horizontal {background-color: rgb(20, 126, 255); }\n"
+                                               "QSlider::handle:horizontal:hover {background-color: rgb(17, 110, 217); }\n"
+                                               "QSlider::handle:horizontal:pressed {background-color: rgb(15, 99, 195); }")
+        self.sl_difficultySlider.setMinimum(17)
+        self.sl_difficultySlider.setMaximum(80)
+        self.sl_difficultySlider.setPageStep(1)
+        self.sl_difficultySlider.setSliderPosition(20)
+        self.sl_difficultySlider.setOrientation(Qt.Horizontal)
+        self.sl_difficultySlider.setInvertedAppearance(False)
+        self.l_difficultyLabel = QLabel(SudokuSolver)
+        self.l_difficultyLabel.setObjectName(u"l_difficultyLabel")
+        self.l_difficultyLabel.setGeometry(QRect(595, 149, 291, 21))
+        font3 = QFont()
+        font3.setFamily(u"Verdana")
+        font3.setPointSize(10)
+        self.l_difficultyLabel.setFont(font3)
+        self.l_difficultyLabel.setStyleSheet(u"color: rgb(20, 126, 255);\n"
+                                             "border-radius: 5px;\n"
+                                             "   background-color: rgb(220, 232, 244);")
+        self.l_difficultyLabel.setAlignment(Qt.AlignRight | Qt.AlignTrailing | Qt.AlignVCenter)
+        self.gridFrame.raise_()
+        self.pb_1.raise_()
+        self.pb_2.raise_()
+        self.pb_3.raise_()
+        self.pb_4.raise_()
+        self.pb_5.raise_()
+        self.pb_6.raise_()
+        self.pb_7.raise_()
+        self.pb_8.raise_()
+        self.pb_9.raise_()
+        self.pb_solve.raise_()
+        self.pb_new.raise_()
+        self.pb_import.raise_()
+        self.l_difficultyLabel.raise_()
+        self.sl_difficultySlider.raise_()
+
+        self.retranslateUi(SudokuSolver)
+
+        self.pb_1.setDefault(False)
+        self.pb_2.setDefault(False)
+        self.pb_3.setDefault(False)
+        self.pb_4.setDefault(False)
+        self.pb_5.setDefault(False)
+        self.pb_6.setDefault(False)
+        self.pb_7.setDefault(False)
+        self.pb_8.setDefault(False)
+        self.pb_9.setDefault(False)
+        self.pb_solve.setDefault(False)
+        self.pb_new.setDefault(False)
+        self.pb_import.setDefault(False)
+
+        QMetaObject.connectSlotsByName(SudokuSolver)
+
+    # setupUi
+
+    def retranslateUi(self, SudokuSolver):
+        SudokuSolver.setWindowTitle(QCoreApplication.translate("SudokuSolver", u"Dialog", None))
+        self.pb_1.setText(QCoreApplication.translate("SudokuSolver", u"1", None))
+        self.pb_2.setText(QCoreApplication.translate("SudokuSolver", u"2", None))
+        self.pb_3.setText(QCoreApplication.translate("SudokuSolver", u"3", None))
+        self.pb_4.setText(QCoreApplication.translate("SudokuSolver", u"4", None))
+        self.pb_5.setText(QCoreApplication.translate("SudokuSolver", u"5", None))
+        self.pb_6.setText(QCoreApplication.translate("SudokuSolver", u"6", None))
+        self.pb_7.setText(QCoreApplication.translate("SudokuSolver", u"7", None))
+        self.pb_8.setText(QCoreApplication.translate("SudokuSolver", u"8", None))
+        self.pb_9.setText(QCoreApplication.translate("SudokuSolver", u"9", None))
+        self.pb_solve.setText(QCoreApplication.translate("SudokuSolver", u"Solve", None))
+        self.pb_new.setText(QCoreApplication.translate("SudokuSolver", u"New", None))
+        self.pb_import.setText(QCoreApplication.translate("SudokuSolver", u"Import", None))
+        self.l_difficultyLabel.setText(QCoreApplication.translate("SudokuSolver", u"Generate: x Squares ", None))
+    # retranslateUi
+
+
+app = QtWidgets.QApplication(sys.argv)
+MainWindow = QtWidgets.QMainWindow()
+ui = Ui_SudokuSolver()
+ui.setupUi(MainWindow)
+MainWindow.show()
+sys.exit(app.exec_())
