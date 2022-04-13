@@ -1,5 +1,6 @@
 import copy
 import random
+import time
 
 
 class SudokuBoard:
@@ -47,7 +48,7 @@ class SudokuBoard:
         initial_solution = []
         solution_found = False
 
-        while True:
+        for solution_attempt in range(2):
             i = 0
             while i < 9:
                 j = 0
@@ -85,7 +86,10 @@ class SudokuBoard:
             solution_found = True
             # initial_solution is the first solution found, need to copy in case there are no other solutions possible
             initial_solution = copy.deepcopy(solve_board.arr)
-            popped = solution_stack.pop()
+            try:
+                popped = solution_stack.pop()
+            except IndexError:
+                return self
             j = popped[0]
             i = popped[1]
             solve_board.arr[i][j] = 0
@@ -122,6 +126,20 @@ class SudokuBoard:
         return True
 
     def __attempt_insert_num(self, x, y, ignore_vals):
+        """
+            Tries to insert a value 1-9 in the list, if fails, attempt to insert 1-9 minus the already
+            attempted num(s)
+            If it cannot insert any number, returns None
+        """
+        for i in range(1, 10):
+            if i in ignore_vals:
+                continue
+            if self.__valid_insert(x, y, i):
+                self.arr[y][x] = i
+                return i
+        return -1
+
+    def __attempt_insert_random_num(self, x, y, ignore_vals):
         """
             Tries to insert a random value 1-9 in the list, if fails, attempt to insert 1-9 minus the already
             attempted num(s)
@@ -195,8 +213,38 @@ class SudokuBoard:
 
     @staticmethod
     def generate_board(num_squares):
-        generated_board = SudokuBoard()
-        generated_board.arr = generated_board.solve()
+        while True:
+            generated_board = SudokuBoard()
+            attempted_nums = []
+            for i in range(82):
+                attempted_nums.append([])
+            solution_stack = []
+            i = 0
+            while i < 9:
+                j = 0
+                while j < 9:
+                    if generated_board.arr[i][j] == 0:
+                        insert_num = generated_board.__attempt_insert_random_num(j, i, attempted_nums[(i * 9) + j])
+
+                        if insert_num == -1:
+                            # No solution for the current location, pop stack
+                            popped = solution_stack.pop()
+                            j = popped[0]
+                            i = popped[1]
+                            generated_board.arr[i][j] = 0
+                            SudokuBoard.__cleanse_after(i, j, attempted_nums)
+                            continue
+                        else:
+                            solution_stack.append([j, i, insert_num])
+                            # noinspection PyTypeChecker
+                            attempted_nums[(i * 9) + j].append(insert_num)
+                    j += 1
+                i += 1
+            original_arr = generated_board.arr
+            generated_board.solve()
+            if generated_board.arr is not None:
+                generated_board.arr = original_arr
+                break
         if num_squares < 17:
             num_squares = 17  # this is the absolute minimum for a sudoku puzzle to be solvable
         if num_squares > 81:
@@ -209,11 +257,26 @@ class SudokuBoard:
         random.shuffle(remaining_spots)
 
         squares_to_erase = 81 - num_squares
+        attempts = 0
         for i in range(squares_to_erase):
             row = remaining_spots[0][0]
             column = remaining_spots[0][1]
             remaining_spots.pop(0)
+            save_num = generated_board.arr[row][column]
             generated_board.arr[row][column] = 0
+            save_arr = generated_board.arr
+            if generated_board.solve() is None:
+                attempts += 1
+                if attempts > 1000:
+                    return SudokuBoard.generate_board(num_squares)
+                    # Due to the randomness of generation, if a Sudoku board is too complicated to create a unique
+                    # solution with, we simply try another random board
+                remaining_spots.append([row, column])
+                random.shuffle(remaining_spots)
+                generated_board.arr[row][column] = save_num
+                i -= 1
+            else:
+                generated_board.arr = save_arr
 
         return generated_board
 
@@ -266,5 +329,23 @@ unsolvable_sudoku_arr = [
     [7, 9, 1, 0, 5, 0, 6, 0, 8]
 ]
 
-bad_board = SudokuBoard(unsolvable_sudoku_arr)
-print(bad_board.solve())
+difficult_two_solution_arr = [
+    [0, 8, 0, 0, 0, 9, 7, 4, 3],
+    [0, 5, 0, 0, 0, 8, 0, 1, 0],
+    [0, 1, 0, 0, 0, 0, 0, 0, 0],
+    [8, 0, 0, 0, 0, 5, 0, 0, 0],
+    [0, 0, 0, 8, 0, 4, 0, 0, 0],
+    [0, 0, 0, 3, 0, 0, 0, 0, 6],
+    [0, 0, 0, 0, 0, 0, 0, 7, 0],
+    [0, 3, 0, 5, 0, 0, 0, 8, 0],
+    [9, 7, 2, 4, 0, 0, 0, 5, 0]
+]
+
+start = time.time()
+board = SudokuBoard.generate_board(17)
+end = time.time()
+print(end - start)
+
+
+
+
