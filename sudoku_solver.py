@@ -1,21 +1,19 @@
 import copy
 import random
-import time
+import sudoku_reader
 
 
 class SudokuBoard:
-    def __init__(self, arr=None):
+    def __init__(self, arr=None, path=None):
         if arr is None:
             arr = []
             for i in range(9):
                 arr.append([0, 0, 0, 0, 0, 0, 0, 0, 0])
-        self.arr = arr
-        '''
-        sub_sections are in the form:
-        0 1 2
-        3 4 5
-        6 7 8
-        '''
+        if path is None:
+            self.arr = arr
+        else:
+            # Path given, open file and attempt to parse
+            sudoku_reader.array_from_path(path)
 
     def __str__(self):
         if self.arr is None:
@@ -211,75 +209,6 @@ class SudokuBoard:
             (2, 0): 6, (2, 1): 7, (2, 2): 8
         }[row, column]
 
-    @staticmethod
-    def generate_board(num_squares):
-        while True:
-            generated_board = SudokuBoard()
-            attempted_nums = []
-            for i in range(82):
-                attempted_nums.append([])
-            solution_stack = []
-            i = 0
-            while i < 9:
-                j = 0
-                while j < 9:
-                    if generated_board.arr[i][j] == 0:
-                        insert_num = generated_board.__attempt_insert_random_num(j, i, attempted_nums[(i * 9) + j])
-
-                        if insert_num == -1:
-                            # No solution for the current location, pop stack
-                            popped = solution_stack.pop()
-                            j = popped[0]
-                            i = popped[1]
-                            generated_board.arr[i][j] = 0
-                            SudokuBoard.__cleanse_after(i, j, attempted_nums)
-                            continue
-                        else:
-                            solution_stack.append([j, i, insert_num])
-                            # noinspection PyTypeChecker
-                            attempted_nums[(i * 9) + j].append(insert_num)
-                    j += 1
-                i += 1
-            original_arr = generated_board.arr
-            generated_board.solve()
-            if generated_board.arr is not None:
-                generated_board.arr = original_arr
-                break
-        if num_squares < 17:
-            num_squares = 17  # this is the absolute minimum for a sudoku puzzle to be solvable
-        if num_squares > 81:
-            return generated_board
-
-        remaining_spots = []
-        for row in range(9):
-            for column in range(9):
-                remaining_spots.append([row, column])
-        random.shuffle(remaining_spots)
-
-        squares_to_erase = 81 - num_squares
-        attempts = 0
-        for i in range(squares_to_erase):
-            row = remaining_spots[0][0]
-            column = remaining_spots[0][1]
-            remaining_spots.pop(0)
-            save_num = generated_board.arr[row][column]
-            generated_board.arr[row][column] = 0
-            save_arr = generated_board.arr
-            if generated_board.solve() is None:
-                attempts += 1
-                if attempts > 1000:
-                    return SudokuBoard.generate_board(num_squares)
-                    # Due to the randomness of generation, if a Sudoku board is too complicated to create a unique
-                    # solution with, we simply try another random board
-                remaining_spots.append([row, column])
-                random.shuffle(remaining_spots)
-                generated_board.arr[row][column] = save_num
-                i -= 1
-            else:
-                generated_board.arr = save_arr
-
-        return generated_board
-
 
 sudoku_arr = [
     [5, 3, 0, 0, 7, 0, 0, 0, 0],
@@ -341,11 +270,6 @@ difficult_two_solution_arr = [
     [9, 7, 2, 4, 0, 0, 0, 5, 0]
 ]
 
-start = time.time()
-board = SudokuBoard.generate_board(17)
-end = time.time()
-print(end - start)
-
-
+board = SudokuBoard(path='Resources/resizeTest.jpg')
 
 
