@@ -270,6 +270,6 @@ difficult_two_solution_arr = [
     [9, 7, 2, 4, 0, 0, 0, 5, 0]
 ]
 
-board = SudokuBoard(path='Resources/resizeTest.jpg')
+board = SudokuBoard(path='Resources/simple.png')
 
 

@@ -1,6 +1,6 @@
 import numpy as np
 import cv2
-
+import tensorflow as tf
 
 
 def array_from_path(path):
@@ -35,16 +35,25 @@ def array_from_path(path):
         matrix = cv2.getPerspectiveTransform(points_one, points_two)
         img = cv2.warpPerspective(img, matrix, (width_img, height_img))
 
-
     # Split into each grid cell, and predict the number
-
+    arr = []
+    for i in range(9):
+        arr.append([0, 0, 0, 0, 0, 0, 0, 0, 0])
     cell_size = width_img / 9
+    model = tf.keras.models.load_model('numbers.model')
     for row in range(9):
         for column in range(9):
             # TODO This is broken, fix later
-            sub_img = img[(cell_size * column):(cell_size * (column + 1)), (cell_size * row):(cell_size * (row + 1))]
-            cv2.imshow('sub', sub_img)
-            cv2.waitKey(0)
+            y1 = int(cell_size * row)
+            y2 = int(cell_size * (row + 1))
+            x1 = int(cell_size * column)
+            x2 = int(cell_size * (column + 1))
+
+            sub_img = img[y1+4:y2-4, x1+4:x2-4]
+            # Send sub-image to be predicted
+            arr[row][column] = predict(sub_img, model)
+
+    return
 
 def reorder_points(points):
     points = points.reshape((4, 2))
@@ -56,3 +65,16 @@ def reorder_points(points):
     points_new[1] = points[np.argmin(difference)]
     points_new[2] = points[np.argmax(difference)]
     return points_new
+
+def predict(img, model):
+    img = cv2.resize(img, (28, 28))
+    # convert rgb to grayscale
+    img = np.array(img)
+    # reshaping to support our model input and normalizing
+    img = img.reshape(1, 28, 28, 1)
+    img = img / 255.0
+    # predicting the class
+    res = model.predict([img])[0]
+    if max(res) < 0.4:
+        return 0
+    return np.argmax(res)
