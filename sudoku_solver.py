@@ -13,7 +13,7 @@ class SudokuBoard:
             self.arr = arr
         else:
             # Path given, open file and attempt to parse
-            sudoku_reader.array_from_path(path)
+            self.arr = sudoku_reader.array_from_path(path)
 
     def __str__(self):
         if self.arr is None:

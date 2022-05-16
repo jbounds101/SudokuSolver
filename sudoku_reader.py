@@ -49,11 +49,12 @@ def array_from_path(path):
             x1 = int(cell_size * column)
             x2 = int(cell_size * (column + 1))
 
-            sub_img = img[y1+4:y2-4, x1+4:x2-4]
+            sub_img = img[y1 + 4:y2 - 4, x1 + 4:x2 - 4]
             # Send sub-image to be predicted
             arr[row][column] = predict(sub_img, model)
 
-    return
+    return arr
+
 
 def reorder_points(points):
     points = points.reshape((4, 2))
@@ -66,6 +67,7 @@ def reorder_points(points):
     points_new[2] = points[np.argmax(difference)]
     return points_new
 
+
 def predict(img, model):
     img = cv2.resize(img, (28, 28))
     # convert rgb to grayscale
@@ -75,6 +77,6 @@ def predict(img, model):
     img = img / 255.0
     # predicting the class
     res = model.predict([img])[0]
-    if max(res) < 0.4:
+    if max(res) < 0.3:
         return 0
     return np.argmax(res)
